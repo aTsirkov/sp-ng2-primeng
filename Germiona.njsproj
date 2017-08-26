@@ -1,0 +1,230 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+    <Name>Germiona</Name>
+    <RootNamespace>Germiona</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>b4056029-c4c5-4d93-91c3-b7dbe72013de</ProjectGuid>
+    <ProjectHome>.</ProjectHome>
+    <StartupFile>
+    </StartupFile>
+    <StartWebBrowser>True</StartWebBrowser>
+    <SearchPath>
+    </SearchPath>
+    <WorkingDirectory>.</WorkingDirectory>
+    <OutputPath>.</OutputPath>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <ProjectTypeGuids>{3AF33F2E-1136-4D97-BBB7-1795711AC8B8};{349c5851-65df-11da-9384-00065b846f21};{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}</ProjectTypeGuids>
+    <ProjectView>ProjectFiles</ProjectView>
+    <NodejsPort>1337</NodejsPort>
+    <TypeScriptSourceMap>true</TypeScriptSourceMap>
+    <TypeScriptModuleKind>CommonJS</TypeScriptModuleKind>
+    <EnableTypeScript>true</EnableTypeScript>
+    <StartWebBrowser>true</StartWebBrowser>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+  <ItemGroup>
+    <Content Include="src\app\app.component.css" />
+    <Content Include="src\app\app.component.html" />
+    <Content Include="src\app\forms\activity\activity.component.css" />
+    <Content Include="src\app\forms\activity\activity.component.html" />
+    <Content Include="src\app\forms\company\company.component.css" />
+    <Content Include="src\app\forms\company\company.component.html" />
+    <Content Include="src\app\forms\customer\customer.component.css" />
+    <Content Include="src\app\forms\customer\customer.component.html" />
+    <Content Include="src\app\forms\frs\frs.component.css" />
+    <Content Include="src\app\forms\frs\frs.component.html" />
+    <Content Include="src\app\forms\home\home.component.css" />
+    <Content Include="src\app\forms\home\home.component.html" />
+    <Content Include="src\app\forms\menupanel\panelmenu.component.css" />
+    <Content Include="src\app\forms\menupanel\panelmenu.component.html" />
+    <Content Include="src\app\forms\orders\home.component.css" />
+    <Content Include="src\app\forms\orders\home.component.html" />
+    <Content Include="src\app\forms\order\order.component.css" />
+    <Content Include="src\app\forms\order\order.component.html" />
+    <Content Include="src\app\forms\price\home.component.css" />
+    <Content Include="src\app\forms\price\home.component.html" />
+    <Content Include="src\app\forms\rtcenter\rtcenter.component.css" />
+    <Content Include="src\app\forms\rtcenter\rtcenter.component.html" />
+    <Content Include="src\app\forms\rtk\rtk_assets\rtk_assets.component.css" />
+    <Content Include="src\app\forms\rtk\rtk_assets\rtk_assets.component.html" />
+    <Content Include="src\app\forms\rtk\rtk_exemplar\rtk_exemplar.component.css" />
+    <Content Include="src\app\forms\rtk\rtk_exemplar\rtk_exemplar.component.html" />
+    <Content Include="src\app\forms\rtk\rtk_materials\rtk_materials.component.css" />
+    <Content Include="src\app\forms\rtk\rtk_materials\rtk_materials.component.html" />
+    <Content Include="src\app\forms\rtk\rtk_objects\rtk_objects.component.css" />
+    <Content Include="src\app\forms\rtk\rtk_objects\rtk_objects.component.html" />
+    <Content Include="src\app\forms\rtk\rtk_operations\rtk_operations.component.css" />
+    <Content Include="src\app\forms\rtk\rtk_operations\rtk_operations.component.html" />
+    <Content Include="src\app\forms\rtk\rtk_subcontracting\rtk_subcontracting.component.css" />
+    <Content Include="src\app\forms\rtk\rtk_subcontracting\rtk_subcontracting.component.html" />
+    <Content Include="src\app\forms\rtk\rtk_unified\rtk_unified.component.css" />
+    <Content Include="src\app\forms\rtk\rtk_unified\rtk_unified.component.html" />
+    <Content Include="src\app\forms\services\srv_nomenclature\srv_nomenclature.component.css" />
+    <Content Include="src\app\forms\services\srv_nomenclature\srv_nomenclature.component.html" />
+    <Content Include="src\app\forms\services\srv_catalog\srv_catalog.component.css" />
+    <Content Include="src\app\forms\services\srv_catalog\srv_catalog.component.html" />
+    <Content Include="src\app\forms\services\object_kind\srv_obj_kind.component.css" />
+    <Content Include="src\app\forms\services\object_kind\srv_obj_kind.component.html" />
+    <Content Include="src\app\forms\specialist\specialist.component.css" />
+    <Content Include="src\app\forms\specialist\specialist.component.html" />
+    <Content Include="src\app\sharepoint\test\test.component.css" />
+    <Content Include="src\app\sharepoint\test\test.component.html" />
+    <Content Include="src\favicon.ico" />
+    <Content Include="src\index.html" />
+    <Content Include="tsconfig.aot.json" />
+    <Content Include="tsconfig.json" />
+    <Content Include="package.json" />
+    <Content Include="README.md" />
+    <TypeScriptCompile Include="src\app\app.component.ts" />
+    <TypeScriptCompile Include="src\app\app.module.ts" />
+    <TypeScriptCompile Include="src\app\app.routes.ts" />
+    <TypeScriptCompile Include="src\app\entities\frs.entities.ts" />
+    <TypeScriptCompile Include="src\app\entities\index.ts" />
+    <TypeScriptCompile Include="src\app\entities\serviceCatalog.entities.ts" />
+    <TypeScriptCompile Include="src\app\entities\serviceNameList.entities.ts" />
+    <TypeScriptCompile Include="src\app\entities\serviceObjectKind.entities.ts" />
+    <TypeScriptCompile Include="src\app\entities\activity.entities.ts" />
+    <TypeScriptCompile Include="src\app\entities\specialistsCategories.entities.ts" />
+    <TypeScriptCompile Include="src\app\entities\unifiedRTK.entities.ts" />
+    <TypeScriptCompile Include="src\app\entities\orders.entities.ts" />
+    <TypeScriptCompile Include="src\app\entities\materialsRTK.entities.ts" />
+    <TypeScriptCompile Include="src\app\entities\subcontractingRTK.entities.ts" />
+    <TypeScriptCompile Include="src\app\entities\assetsRTK.entities.ts" />
+    <TypeScriptCompile Include="src\app\entities\objectsRTK.entities.ts" />
+    <TypeScriptCompile Include="src\app\entities\company.entities.ts" />
+    <TypeScriptCompile Include="src\app\entities\exemplarRTK.entities.ts" />
+    <TypeScriptCompile Include="src\app\entities\operationRTK.entities.ts" />
+    <TypeScriptCompile Include="src\app\entities\rtc.entities.ts" />
+    <TypeScriptCompile Include="src\app\forms\activity\activity.component.ts" />
+    <TypeScriptCompile Include="src\app\forms\company\company.component.ts" />
+    <TypeScriptCompile Include="src\app\entities\catalog.enums.ts" />
+    <TypeScriptCompile Include="src\app\forms\customer\customer.component.ts" />
+    <TypeScriptCompile Include="src\app\forms\frs\frs.component.ts" />
+    <TypeScriptCompile Include="src\app\forms\home\home.component.ts" />
+    <TypeScriptCompile Include="src\app\forms\menupanel\panelmenu.component.ts" />
+    <TypeScriptCompile Include="src\app\forms\orders\home.component.ts" />
+    <TypeScriptCompile Include="src\app\forms\order\order.component.ts" />
+    <TypeScriptCompile Include="src\app\forms\price\home.component.ts" />
+    <TypeScriptCompile Include="src\app\forms\rtcenter\rtcenter.component.ts" />
+    <TypeScriptCompile Include="src\app\forms\rtk\rtk_assets\rtk_assets.component.ts" />
+    <TypeScriptCompile Include="src\app\forms\rtk\rtk_exemplar\rtk_exemplar.component.ts" />
+    <TypeScriptCompile Include="src\app\forms\rtk\rtk_materials\rtk_materials.component.ts" />
+    <TypeScriptCompile Include="src\app\forms\rtk\rtk_objects\rtk_objects.component.ts" />
+    <TypeScriptCompile Include="src\app\forms\rtk\rtk_operations\rtk_operations.component.ts" />
+    <TypeScriptCompile Include="src\app\forms\rtk\rtk_subcontracting\rtk_subcontracting.component.ts" />
+    <TypeScriptCompile Include="src\app\forms\rtk\rtk_unified\rtk_unified.component.ts" />
+    <TypeScriptCompile Include="src\app\forms\services\srv_nomenclature\srv_nomenclature.component.ts" />
+    <TypeScriptCompile Include="src\app\forms\services\srv_catalog\srv_catalog.component.ts" />
+    <TypeScriptCompile Include="src\app\forms\services\object_kind\srv_obj_kind.component.ts" />
+    <TypeScriptCompile Include="src\app\forms\specialist\specialist.component.ts" />
+    <TypeScriptCompile Include="src\app\sharepoint\model\MyDocumentCollection.ts" />
+    <TypeScriptCompile Include="src\app\sharepoint\model\MyItem.ts" />
+    <TypeScriptCompile Include="src\app\sharepoint\parser\SelectDecoratorsParsers.ts" />
+    <TypeScriptCompile Include="src\app\sharepoint\sharepoint.service.ts" />
+    <TypeScriptCompile Include="src\app\sharepoint\sharepoint.settings.ts" />
+    <TypeScriptCompile Include="src\app\sharepoint\test\model.entities.ts" />
+    <TypeScriptCompile Include="src\app\sharepoint\test\test.entities.ts" />
+    <TypeScriptCompile Include="src\app\sharepoint\test\test.component.ts" />
+    <TypeScriptCompile Include="src\app\sharepoint\utils\decorators.ts" />
+    <TypeScriptCompile Include="src\app\sharepoint\utils\list_helper.ts" />
+    <TypeScriptCompile Include="src\app\sharepoint\utils\symbol.ts" />
+    <TypeScriptCompile Include="src\custom-typings.d.ts" />
+    <TypeScriptCompile Include="src\main.browser.ts" />
+    <TypeScriptCompile Include="src\polyfills.browser.ts" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="config\" />
+    <Folder Include="src\" />
+    <Folder Include="src\app\" />
+    <Folder Include="src\app\forms\home\" />
+    <Folder Include="src\app\forms\menupanel\" />
+    <Folder Include="src\app\forms\company\" />
+    <Folder Include="src\app\entities\" />
+    <Folder Include="src\app\forms\" />
+    <Folder Include="src\app\forms\customer\" />
+    <Folder Include="src\app\forms\activity\" />
+    <Folder Include="src\app\forms\frs\" />
+    <Folder Include="src\app\forms\rtcenter\" />
+    <Folder Include="src\app\forms\order\" />
+    <Folder Include="src\app\forms\rtk\rtk_assets\" />
+    <Folder Include="src\app\forms\rtk\rtk_unified\" />
+    <Folder Include="src\app\forms\services\srv_nomenclature\" />
+    <Folder Include="src\app\forms\specialist\" />
+    <Folder Include="src\app\forms\services\" />
+    <Folder Include="src\app\forms\rtk\rtk_subcontracting\" />
+    <Folder Include="src\app\forms\rtk\rtk_operations\" />
+    <Folder Include="src\app\forms\rtk\rtk_materials\" />
+    <Folder Include="src\app\forms\rtk\rtk_objects\" />
+    <Folder Include="src\app\forms\rtk\rtk_exemplar\" />
+    <Folder Include="src\app\forms\services\srv_catalog\" />
+    <Folder Include="src\app\forms\services\object_kind\" />
+    <Folder Include="src\app\sharepoint\" />
+    <Folder Include="src\app\forms\price\" />
+    <Folder Include="src\app\forms\orders\" />
+    <Folder Include="src\app\forms\rtk\" />
+    <Folder Include="src\app\sharepoint\model\" />
+    <Folder Include="src\app\sharepoint\test\" />
+    <Folder Include="src\app\sharepoint\parser\" />
+    <Folder Include="src\app\sharepoint\utils\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="config\helpers.js" />
+    <Compile Include="config\webpack.common.js" />
+    <Compile Include="config\webpack.dev.js" />
+    <Compile Include="config\webpack.prod.js" />
+    <Compile Include="webpack.config.js" />
+  </ItemGroup>
+  <!-- Do not delete the following Import Project.  While this appears to do nothing it is a marker for setting TypeScript properties before our import that depends on them. -->
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets" Condition="False" />
+  <Import Project="$(VSToolsPath)\Node.js Tools\Microsoft.NodejsTools.targets" />
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
+        <WebProjectProperties>
+          <UseIIS>False</UseIIS>
+          <AutoAssignPort>True</AutoAssignPort>
+          <DevelopmentServerPort>0</DevelopmentServerPort>
+          <DevelopmentServerVPath>/</DevelopmentServerVPath>
+          <IISUrl>http://localhost:48022/</IISUrl>
+          <NTLMAuthentication>False</NTLMAuthentication>
+          <UseCustomServer>True</UseCustomServer>
+          <CustomServerUrl>http://localhost:1337</CustomServerUrl>
+          <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
+        </WebProjectProperties>
+      </FlavorProperties>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}" User="">
+        <WebProjectProperties>
+          <StartPageUrl>
+          </StartPageUrl>
+          <StartAction>CurrentPage</StartAction>
+          <AspNetDebugging>True</AspNetDebugging>
+          <SilverlightDebugging>False</SilverlightDebugging>
+          <NativeDebugging>False</NativeDebugging>
+          <SQLDebugging>False</SQLDebugging>
+          <ExternalProgram>
+          </ExternalProgram>
+          <StartExternalURL>
+          </StartExternalURL>
+          <StartCmdLineArguments>
+          </StartCmdLineArguments>
+          <StartWorkingDirectory>
+          </StartWorkingDirectory>
+          <EnableENC>False</EnableENC>
+          <AlwaysStartWebServerOnDebug>False</AlwaysStartWebServerOnDebug>
+        </WebProjectProperties>
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+</Project>

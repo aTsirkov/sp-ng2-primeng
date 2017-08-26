@@ -1,0 +1,36 @@
+﻿<p-dataTable class="table" [value]="items" selectionMode="single" [(selection)]="selectedItem"
+             (onRowDblclick)="onRowSelect($event)" scrollable="true" [responsive]="true">
+    <p-column *ngFor="let col of cols" [field]="col.field" [header]="col.header"></p-column>
+    <p-footer>
+        <div class="ui-helper-clearfix">
+            <button type="button" pButton icon="fa-plus" style="float:left" (click)="showDialogToAdd()" label="Add"></button>
+        </div>
+    </p-footer>
+</p-dataTable>
+
+<p-dialog header="Информация о заказчике" [(visible)]="displayDialog" [responsive]="true" showEffect="fade" [modal]="true">
+    <div class="ui-grid ui-grid-responsive ui-fluid" *ngIf="item">
+        <div class="ui-grid-row">
+            <div class="ui-grid-col-4"><label for="title">Наименование</label></div>
+            <div class="ui-grid-col-8"><input pInputText id="title" [(ngModel)]="item.Title" /></div>
+        </div>
+        <div class="ui-grid-row">
+            <div class="ui-grid-col-4"><label for="ProductNumber">Product Number</label></div>
+            <div class="ui-grid-col-8"><input pInputText id="ProductNumber" [(ngModel)]="item.ProductNumber" /></div>
+        </div>
+        <div class="ui-grid-row">
+            <div class="ui-grid-col-4"><label for="OrderDate">Order Date</label></div>
+            <div class="ui-grid-col-8"><input pInputText id="OrderDate" [(ngModel)]="item.OrderDate" /></div>
+        </div>
+        <div class="ui-grid-row">
+            <div class="ui-grid-col-4"><label for="OrderAmount">Order Amount</label></div>
+            <div class="ui-grid-col-8"><input pInputText id="OrderAmount" [(ngModel)]="item.OrderAmount" /></div>
+        </div>
+    </div>
+    <p-footer>
+        <div class="ui-dialog-buttonpane ui-helper-clearfix">
+            <button type="button" pButton icon="fa-close" (click)="delete()" label="Delete"></button>
+            <button type="button" pButton icon="fa-check" (click)="save()" label="Save"></button>
+        </div>
+    </p-footer>
+</p-dialog>
