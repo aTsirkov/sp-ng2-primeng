@@ -1,6 +1,6 @@
 ﻿<p-dataTable class="table" [value]="items" selectionMode="single" [(selection)]="selectedItem"
              (onRowDblclick)="onRowSelect($event)" scrollable="true" [responsive]="true">
-    <p-column *ngFor="let col of cols" [field]="col.field" [header]="col.header"></p-column>
+    <p-column *ngFor="let col of spForm.Fields" [field]="col.field" [header]="col.header"></p-column>
     <p-footer>
         <div class="ui-helper-clearfix">
             <button type="button" pButton icon="fa-plus" style="float:left" (click)="showDialogToAdd()" label="Add"></button>

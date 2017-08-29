@@ -8,11 +8,8 @@
     <panel-menu class="ui-panel" [@slideInOut]="menuState"></panel-menu>
     <router-outlet></router-outlet>
 
-    <ul>
-        <li *ngFor="let user of userList">
-            {{ user }}
-        </li>
-    </ul>
+</div>
+
 
 <div [@slideTable]="menuState" style="width: 75%;">
      <router-outlet  ></router-outlet>

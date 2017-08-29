@@ -1,9 +1,7 @@
 ﻿import { Component, OnInit, ViewChild } from '@angular/core';
 import { SpService } from '../../sharepoint/sharepoint.service';
+import { SPForm } from '../../entities/spForm.entities';
 import { DataTable } from 'primeng/primeng';
-
-import { TestItem } from './test.entities';
-
 
 @Component({
     selector: 'test',
@@ -12,22 +10,21 @@ import { TestItem } from './test.entities';
 })
 
 export class TestComponent implements OnInit {
-    private mainListName = 'testSPlist';
+    private spForm: SPForm;
     items: Array<Object>;
     item: Object;
     selectedItem: Object;
-    cols: any[];
     newItem: boolean;
     displayDialog: boolean;
 
     constructor(private service: SpService) {
+        this.spForm.ListName = 'testSPlist';
+        this.spForm.ViewName = 'Все элементы';
+
         this.service
-            .getListColumns({
-                ListName: this.mainListName,
-                ViewName: 'Все элементы'
-            })
+            .getListColumns(this.spForm)
             .then(data => {
-                this.cols = data;
+                this.spForm.Fields = data;
                 this.getItems();
             });
     }
@@ -38,7 +35,7 @@ export class TestComponent implements OnInit {
 
     getItems(){
         this.service
-            .getList<TestItem>({ ListName: this.mainListName, Fields: this.cols.map(i => i.field) }, TestItem)
+            .getList<any>(this.spForm)
             .then(items => {
                 this.items = items;
             });
@@ -54,7 +51,7 @@ export class TestComponent implements OnInit {
         let _items = [...this.items];
         if (this.newItem) {
             this.service
-                .addListItem({ ListName: this.mainListName, ItemProps: this.item })
+                .addListItem(this.spForm, this.item )
                 .then(newItem => {
                     _items.push(newItem);
                     this.items = _items;
@@ -63,7 +60,7 @@ export class TestComponent implements OnInit {
         }
         else {
             this.service
-                .updateListItem({ ListName: this.mainListName, ItemProps: this.item })
+                .updateListItem(this.spForm, this.item)
                 .then(item => {
                     _items[this.findSelectedItemIndex()] = this.item;
                     this.items = _items;
@@ -78,7 +75,7 @@ export class TestComponent implements OnInit {
         let index = this.findSelectedItemIndex();
 
         this.service
-            .deleteListItem({ ListName: this.mainListName, ItemProps: this.item })
+            .deleteListItem(this.spForm, this.item)
             .then(res => {
                 if (res) {
                     this.items = this.items.filter((val, i) => i != index);
@@ -102,7 +99,7 @@ export class TestComponent implements OnInit {
             else
                 _item[prop] = c[prop];
         }
-        return <TestItem>_item;
+        return _item;
     }
 
     findSelectedItemIndex(): number {

@@ -1,7 +1,5 @@
 import { Component, trigger, state, style, transition, animate } from '@angular/core';
 
-import { SpService } from './sharepoint/sharepoint.service';
-
 @Component({
   selector: 'app',
   templateUrl: './app.component.html',
@@ -34,12 +32,6 @@ import { SpService } from './sharepoint/sharepoint.service';
 })
 export class AppComponent {
     menuState: string = 'in';
-    userList: string[];
-
-    constructor(private service: SpService) {
-        service.getDomainUsers()
-            .then(response => this.userList = response);
-    }
 
     toggleMenu() {
         // 1-line if statement that toggles the value:

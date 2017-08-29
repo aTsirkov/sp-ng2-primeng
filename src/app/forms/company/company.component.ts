@@ -1,99 +1,125 @@
 ﻿import { Component, OnInit, ViewChild } from '@angular/core';
+import { FormGroup, FormControl, FormArray, FormBuilder, Validators } from '@angular/forms';
 import { SpService } from '../../sharepoint/sharepoint.service';
+import {
+    SPForm, SPField, SPFields, VisibleColumns, SPModel, SPList,
+    getListFields, getVisibleColumns, getFormControls
+} from '../../entities/spForm.entities';
 import { DataTable } from 'primeng/primeng';
-
-import { Company } from '../../entities/';
-
 
 @Component({
     selector: 'company',
     templateUrl: './company.component.html',
     styleUrls: ['./company.component.css'],
 })
-
-
 export class CompanyComponent implements OnInit {
-    companies: Company[];
-    cols: any[];
+    @ViewChild(DataTable) dataTable: DataTable;
+
+    myForm: FormGroup = new FormGroup({});
+    spForm: SPForm = new SPForm();
+    listFields: SPFields = {};
+    visibleCols: VisibleColumns[];
+    DS: SPModel;
+
+    //items: Array<Object>;
+    item: Object;
+    selectedItem: Object;
+    newItem: boolean;
     displayDialog: boolean;
 
-    company: Company = new Company("");
+    constructor(private service: SpService, private _fb: FormBuilder) {
+        this.spForm.listName = 'List15';
+        this.spForm.listTitle = 'Заказчики';
+        this.spForm.viewName = 'Все элементы';
 
-    selectedCompany: Company;
+        this.DS['main'] = {
+            listName: this.spForm.listName,
+            listTitle: this.spForm.listTitle,
+            items: []
+        };
 
-    newCompany: boolean;
-
-    constructor( private service: SpService) {
-    }
-
-    @ViewChild(DataTable) dataTable: DataTable;
-   
-    ngOnInit() {
         this.service
-            .getList<Company>({ ListName: 'Заказчики' }, Company)
-            .then(companies => {
-                this.companies = companies;
+            .getListColumns(this.spForm)
+            .then(data => {
+                this.getItems();
+                this.listFields = getListFields(data);
+                this.myForm = new FormGroup(getFormControls(this.listFields));
+                this.visibleCols = getVisibleColumns(data);
             });
-
-        this.cols = [
-            { field: 'Title', header: 'Наименование' },
-            { field: 'ACBNSI', header: 'Код Контрагента в АСВ НСИ' },
-            { field: 'ESUID', header: 'Код Контрагента ЕСУИД' }
-        ];
-
-        this.dataTable.updatePaginator();
-
-        this.dataTable.updateTotalRecords();
     }
 
+    ngOnInit() { }
 
+    getItems() {
+        this.service
+            .getList<any>(this.spForm, this.listFields)
+            .then(items => {
+                this.DS['main'].items = items;
+            });
+    }
 
     showDialogToAdd() {
-        this.newCompany = true;
-        this.company = new Company("");
+        this.newItem = true;
+        this.item = this.cloneItem(this.selectedItem, true);
         this.displayDialog = true;
     }
 
     save() {
-        let companies = [...this.companies];
-        if (this.newCompany)
-            companies.push(this.company);
-        else
-            companies[this.findSelectedCompanyIndex()] = this.company;
-
-        this.service.updateListItem({ ListName: 'Заказчики', ItemID: this.company.ID, ItemProps: this.company })
-            .then(res => {
-                if (res) {
-                    this.companies = companies;
-                    this.company = null;
-                };
-            });
+        let _items = [...this.DS['main'].items];
+        if (this.newItem) {
+            this.service
+                .addListItem(this.spForm, this.item)
+                .then(newItem => {
+                    _items.push(newItem);
+                    this.DS['main'].items = _items;
+                    this.item = null;
+                });
+        }
+        else {
+            this.service
+                .updateListItem(this.spForm, this.item)
+                .then(item => {
+                    _items[this.findSelectedItemIndex()] = this.item;
+                    this.DS['main'].items = _items;
+                    this.item = null;
+                });
+        }
 
         this.displayDialog = false;
     }
 
     delete() {
-        let index = this.findSelectedCompanyIndex();
-        this.companies = this.companies.filter((val, i) => i != index);
-        this.company = null;
-        this.displayDialog = false;
+        let index = this.findSelectedItemIndex();
+
+        this.service
+            .deleteListItem(this.spForm, this.item)
+            .then(res => {
+                if (res) {
+                    this.DS['main'].items = this.DS['main'].items.filter((val, i) => i != index);
+                    this.item = null;
+                    this.displayDialog = false;
+                }
+            })
     }
 
     onRowSelect(event) {
-        this.newCompany = false;
-        this.company = this.cloneCompany(event.data);
+        this.newItem = false;
+        this.item = this.cloneItem(event.data);
         this.displayDialog = true;
     }
 
-    cloneCompany(c: Company): Company {
-        let company = new Company("");
+    cloneItem(c: Object, empty?: boolean): Object {
+        let _item = {};
         for (let prop in c) {
-            company[prop] = c[prop];
+            if (empty)
+                _item[prop] = undefined;
+            else
+                _item[prop] = c[prop];
         }
-        return <Company>company;
+        return _item;
     }
 
-    findSelectedCompanyIndex(): number {
-        return this.companies.indexOf(this.selectedCompany);
+    findSelectedItemIndex(): number {
+        return this.DS['main'].items.indexOf(this.selectedItem);
     }
 }

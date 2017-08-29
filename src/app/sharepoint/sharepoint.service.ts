@@ -32,7 +32,7 @@ export class SpService {
         return "(InternalName eq " + fltArr.join(") or (InternalName eq ") + ")";
     }
 
-    public getDomainUsers():Promise<any> {
+    public getADUsers():Promise<any> {
         //var res: Promise<any>;
         return this.client.bind()
             .then(() => {
