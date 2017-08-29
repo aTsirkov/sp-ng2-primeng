@@ -1,7 +1,11 @@
-﻿import { Component, OnInit } from '@angular/core';
+﻿import { Component, OnInit, ViewChild } from '@angular/core';
+import { FormGroup, FormControl, FormArray, FormBuilder, Validators } from '@angular/forms';
 import { SpService } from '../../../sharepoint/sharepoint.service';
-
-import { UnifiedRTK } from '../../../entities/';
+import {
+    SPForm, SPField, SPFields, VisibleColumns, SPModel, SPList,
+    getListFields, getVisibleColumns, getFormControls
+} from '../../../entities/spForm.entities';
+import { DataTable } from 'primeng/primeng';
 
 @Component({
     selector: 'rtk_unified',
@@ -9,82 +13,113 @@ import { UnifiedRTK } from '../../../entities/';
     styleUrls: ['./rtk_unified.component.css'],
 })
 export class unifiedRTKComponent implements OnInit {
+    @ViewChild(DataTable) dataTable: DataTable;
 
-    uni_rtks: UnifiedRTK[];
-    cols: any[];
+    myForm: FormGroup = new FormGroup({});
+    spForm: SPForm = new SPForm();
+    listFields: SPFields = {};
+    visibleCols: VisibleColumns[];
+    DS: SPModel;
+
+    //items: Array<Object>;
+    item: Object;
+    selectedItem: Object;
+    newItem: boolean;
     displayDialog: boolean;
 
-    uni_rtk: UnifiedRTK = new UnifiedRTK("");
-    selectedRTK: UnifiedRTK;
-    newRTK: boolean;
+    constructor(private service: SpService, private _fb: FormBuilder) {
+        this.spForm.listName = 'List';
+        this.spForm.listTitle = 'Унифицированная РТК';
+        this.spForm.viewName = 'Все элементы';
 
-    constructor( private service: SpService) {
+        this.DS['main'] = {
+            listName: this.spForm.listName,
+            listTitle: this.spForm.listTitle,
+            items: []
+        };
+
+        this.service
+            .getListColumns(this.spForm)
+            .then(data => {
+                this.getItems();
+                this.listFields = getListFields(data);
+                this.myForm = new FormGroup(getFormControls(this.listFields));
+                this.visibleCols = getVisibleColumns(data);
+            });
     }
 
-    ngOnInit() {
+    ngOnInit() { }
+
+    getItems() {
         this.service
-            .getList<UnifiedRTK>({ ListName: 'Унифицированная РТК' }, UnifiedRTK)
-            .then(uni_rtks => {
-                this.uni_rtks = uni_rtks;
+            .getList<any>(this.spForm, this.listFields)
+            .then(items => {
+                this.DS['main'].items = items;
             });
-        this.cols = [
-            { field: 'Title', header: 'Наименование' },
-            { field: 'ServiceNameList', header: 'Услуга' },
-            { field: 'Status', header: 'Статус' },
-            { field: 'Modified', header: 'Изменено' },
-            { field: 'Editor', header: 'Кем изменено' },
-            { field: 'Created', header: 'Создано' },
-            { field: 'Author', header: 'Кем создано' },
-            { field: 'UnifiedOperations', header: 'UnifiedOperations' }
-        ];
     }
 
     showDialogToAdd() {
-        this.newRTK = true;
-        this.uni_rtk = new UnifiedRTK("");
+        this.newItem = true;
+        this.item = this.cloneItem(this.selectedItem, true);
         this.displayDialog = true;
     }
 
     save() {
-        let uni_rtks = [...this.uni_rtks];
-        if (this.newRTK)
-            uni_rtks.push(this.uni_rtk);
-        else
-            uni_rtks[this.findSelectedRTKIndex()] = this.uni_rtk;
-
-        this.service.updateListItem({ ListName: 'Унифицированная РТК', ItemID: this.uni_rtk.ID, ItemProps: this.uni_rtk })
-            .then(res => {
-                if (res) {
-                    this.uni_rtks = uni_rtks;
-                    this.uni_rtk = null;
-                };
-            });
+        let _items = [...this.DS['main'].items];
+        if (this.newItem) {
+            this.service
+                .addListItem(this.spForm, this.item)
+                .then(newItem => {
+                    _items.push(newItem);
+                    this.DS['main'].items = _items;
+                    this.item = null;
+                });
+        }
+        else {
+            this.service
+                .updateListItem(this.spForm, this.item)
+                .then(item => {
+                    _items[this.findSelectedItemIndex()] = this.item;
+                    this.DS['main'].items = _items;
+                    this.item = null;
+                });
+        }
 
         this.displayDialog = false;
     }
 
     delete() {
-        let index = this.findSelectedRTKIndex();
-        this.uni_rtks = this.uni_rtks.filter((val, i) => i != index);
-        this.uni_rtk = null;
-        this.displayDialog = false;
+        let index = this.findSelectedItemIndex();
+
+        this.service
+            .deleteListItem(this.spForm, this.item)
+            .then(res => {
+                if (res) {
+                    this.DS['main'].items = this.DS['main'].items.filter((val, i) => i != index);
+                    this.item = null;
+                    this.displayDialog = false;
+                }
+            })
     }
 
     onRowSelect(event) {
-        this.newRTK = false;
-        this.uni_rtk = this.cloneCenter(event.data);
+        this.newItem = false;
+        this.item = this.cloneItem(event.data);
         this.displayDialog = true;
     }
 
-    cloneCenter(c: UnifiedRTK): UnifiedRTK {
-        let uni_rtk = new UnifiedRTK("");
+    cloneItem(c: Object, empty?: boolean): Object {
+        let _item = {};
         for (let prop in c) {
-            uni_rtk[prop] = c[prop];
+            if (empty)
+                _item[prop] = undefined;
+            else
+                _item[prop] = c[prop];
         }
-        return <UnifiedRTK>uni_rtk;
+        return _item;
     }
 
-    findSelectedRTKIndex(): number {
-        return this.uni_rtks.indexOf(this.selectedRTK);
+    findSelectedItemIndex(): number {
+        return this.DS['main'].items.indexOf(this.selectedItem);
     }
 }

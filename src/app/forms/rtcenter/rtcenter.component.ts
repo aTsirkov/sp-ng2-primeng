@@ -1,7 +1,11 @@
-﻿import { Component, OnInit } from '@angular/core';
+﻿import { Component, OnInit, ViewChild } from '@angular/core';
+import { FormGroup, FormControl, FormArray, FormBuilder, Validators } from '@angular/forms';
 import { SpService } from '../../sharepoint/sharepoint.service';
-
-import { RTC } from '../../entities/';
+import {
+    SPForm, SPField, SPFields, VisibleColumns, SPModel, SPList,
+    getListFields, getVisibleColumns, getFormControls
+} from '../../entities/spForm.entities';
+import { DataTable } from 'primeng/primeng';
 
 @Component({
     selector: 'rtcenter',
@@ -9,79 +13,113 @@ import { RTC } from '../../entities/';
     styleUrls: ['./rtcenter.component.css'],
 })
 export class RTCenterComponent implements OnInit {
- //   companies: Company[];
-    centers: RTC[];
-    cols: any[];
+    @ViewChild(DataTable) dataTable: DataTable;
+
+    myForm: FormGroup = new FormGroup({});
+    spForm: SPForm = new SPForm();
+    listFields: SPFields = {};
+    visibleCols: VisibleColumns[];
+    DS: SPModel;
+
+    //items: Array<Object>;
+    item: Object;
+    selectedItem: Object;
+    newItem: boolean;
     displayDialog: boolean;
 
-    center: RTC = new RTC("");
-    selectedCenter: RTC;
-    newCenter: boolean;
+    constructor(private service: SpService, private _fb: FormBuilder) {
+        this.spForm.listName = 'List5';
+        this.spForm.listTitle = 'Региональные технические центры';
+        this.spForm.viewName = 'Все элементы';
 
-    constructor( private service: SpService) {
+        this.DS['main'] = {
+            listName: this.spForm.listName,
+            listTitle: this.spForm.listTitle,
+            items: []
+        };
+
+        this.service
+            .getListColumns(this.spForm)
+            .then(data => {
+                this.getItems();
+                this.listFields = getListFields(data);
+                this.myForm = new FormGroup(getFormControls(this.listFields));
+                this.visibleCols = getVisibleColumns(data);
+            });
     }
 
-    ngOnInit() {
+    ngOnInit() { }
+
+    getItems() {
         this.service
-            .getList<RTC>({ ListName: 'Региональные технические центры' }, RTC)
-            .then(centers => {
-                this.centers = centers;
+            .getList<any>(this.spForm, this.listFields)
+            .then(items => {
+                this.DS['main'].items = items;
             });
-        this.cols = [
-            { field: 'Title', header: 'Наименование' },
-            { field: 'OData__x041f__x043e__x043b__x043d__x04', header: 'Код' },
-            { field: 'ServiceManager', header: 'Сервис менеджер' },
-            { field: 'Director', header: 'Директор' }
-            
-        ];
     }
 
     showDialogToAdd() {
-        this.newCenter = true;
-        this.center = new RTC("");
+        this.newItem = true;
+        this.item = this.cloneItem(this.selectedItem, true);
         this.displayDialog = true;
     }
 
     save() {
-        let centers = [...this.centers];
-        if (this.newCenter)
-            centers.push(this.center);
-        else
-            centers[this.findSelectedCenterIndex()] = this.center;
-
-        this.service.updateListItem({ ListName: 'Региональные технические центры', ItemID: this.center.ID, ItemProps: this.center })
-            .then(res => {
-                if (res) {
-                    this.centers = centers;
-                    this.center = null;
-                };
-            });
+        let _items = [...this.DS['main'].items];
+        if (this.newItem) {
+            this.service
+                .addListItem(this.spForm, this.item)
+                .then(newItem => {
+                    _items.push(newItem);
+                    this.DS['main'].items = _items;
+                    this.item = null;
+                });
+        }
+        else {
+            this.service
+                .updateListItem(this.spForm, this.item)
+                .then(item => {
+                    _items[this.findSelectedItemIndex()] = this.item;
+                    this.DS['main'].items = _items;
+                    this.item = null;
+                });
+        }
 
         this.displayDialog = false;
     }
 
     delete() {
-        let index = this.findSelectedCenterIndex();
-        this.centers = this.centers.filter((val, i) => i != index);
-        this.center = null;
-        this.displayDialog = false;
+        let index = this.findSelectedItemIndex();
+
+        this.service
+            .deleteListItem(this.spForm, this.item)
+            .then(res => {
+                if (res) {
+                    this.DS['main'].items = this.DS['main'].items.filter((val, i) => i != index);
+                    this.item = null;
+                    this.displayDialog = false;
+                }
+            })
     }
 
     onRowSelect(event) {
-        this.newCenter = false;
-        this.center = this.cloneCenter(event.data);
+        this.newItem = false;
+        this.item = this.cloneItem(event.data);
         this.displayDialog = true;
     }
 
-    cloneCenter(c: RTC): RTC {
-        let center = new RTC("");
+    cloneItem(c: Object, empty?: boolean): Object {
+        let _item = {};
         for (let prop in c) {
-            center[prop] = c[prop];
+            if (empty)
+                _item[prop] = undefined;
+            else
+                _item[prop] = c[prop];
         }
-        return <RTC>center;
+        return _item;
     }
 
-    findSelectedCenterIndex(): number {
-        return this.centers.indexOf(this.selectedCenter);
+    findSelectedItemIndex(): number {
+        return this.DS['main'].items.indexOf(this.selectedItem);
     }
 }

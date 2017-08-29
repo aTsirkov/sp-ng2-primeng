@@ -1,7 +1,11 @@
-﻿import { Component, OnInit } from '@angular/core';
+﻿import { Component, OnInit, ViewChild } from '@angular/core';
+import { FormGroup, FormControl, FormArray, FormBuilder, Validators } from '@angular/forms';
 import { SpService } from '../../sharepoint/sharepoint.service';
-
-import { Order } from '../../entities/';
+import {
+    SPForm, SPField, SPFields, VisibleColumns, SPModel, SPList,
+    getListFields, getVisibleColumns, getFormControls
+} from '../../entities/spForm.entities';
+import { DataTable } from 'primeng/primeng';
 
 @Component({
     selector: 'order',
@@ -10,85 +14,113 @@ import { Order } from '../../entities/';
 
 })
 export class OrderComponent implements OnInit {
+    @ViewChild(DataTable) dataTable: DataTable;
 
-    orders: Order[];
-    cols: any[];
+    myForm: FormGroup = new FormGroup({});
+    spForm: SPForm = new SPForm();
+    listFields: SPFields = {};
+    visibleCols: VisibleColumns[];
+    DS: SPModel;
+
+    //items: Array<Object>;
+    item: Object;
+    selectedItem: Object;
+    newItem: boolean;
     displayDialog: boolean;
 
-    order: Order = new Order("");
-    selectedOrder: Order;
-    newOrder: boolean;
+    constructor(private service: SpService, private _fb: FormBuilder) {
+        this.spForm.listName = 'List7';
+        this.spForm.listTitle = 'Заказ';
+        this.spForm.viewName = 'Все элементы';
 
+        this.DS['main'] = {
+            listName: this.spForm.listName,
+            listTitle: this.spForm.listTitle,
+            items: []
+        };
 
-    constructor( private service: SpService) {
-    }
-
-    ngOnInit() {
         this.service
-            .getList<Order>({ ListName: 'Заказ' }, Order)
-            .then(orders => {
-                this.orders = orders;
+            .getListColumns(this.spForm)
+            .then(data => {
+                this.getItems();
+                this.listFields = getListFields(data);
+                this.myForm = new FormGroup(getFormControls(this.listFields));
+                this.visibleCols = getVisibleColumns(data);
             });
-        this.cols = [
-            { field: 'Title', header: 'Наименование' },
-            { field: 'RegionalTechnicalCenter', header: 'Региональный технический центр' },
-            { field: 'Company', header: 'Заказчик' },
-            { field: 'TotalAmount', header: 'Сумма РТК' },
-            { field: 'Operations', header: 'Operations' },
-            { field: 'MapMaterial', header: 'MapMaterial' },
-            { field: 'MapSubcontracting', header: 'MapSubcontracting' },
-            { field: 'MapActive', header: 'MapActive' }
-              
-        ];
     }
 
+    ngOnInit() { }
+
+    getItems() {
+        this.service
+            .getList<any>(this.spForm, this.listFields)
+            .then(items => {
+                this.DS['main'].items = items;
+            });
+    }
 
     showDialogToAdd() {
-        this.newOrder = true;
-        this.order = new Order("");
+        this.newItem = true;
+        this.item = this.cloneItem(this.selectedItem, true);
         this.displayDialog = true;
     }
 
     save() {
-        let frss = [...this.orders];
-        if (this.newOrder)
-            frss.push(this.order);
-        else
-            frss[this.findSelectedOrderIndex()] = this.order;
-
-        this.service.updateListItem({ ListName: 'Заказ', ItemID: this.order.ID, ItemProps: this.order })
-            .then(res => {
-                if (res) {
-                    this.orders = frss;
-                    this.order = null;
-                };
-            });
+        let _items = [...this.DS['main'].items];
+        if (this.newItem) {
+            this.service
+                .addListItem(this.spForm, this.item)
+                .then(newItem => {
+                    _items.push(newItem);
+                    this.DS['main'].items = _items;
+                    this.item = null;
+                });
+        }
+        else {
+            this.service
+                .updateListItem(this.spForm, this.item)
+                .then(item => {
+                    _items[this.findSelectedItemIndex()] = this.item;
+                    this.DS['main'].items = _items;
+                    this.item = null;
+                });
+        }
 
         this.displayDialog = false;
     }
 
     delete() {
-        let index = this.findSelectedOrderIndex();
-        this.orders = this.orders.filter((val, i) => i != index);
-        this.order = null;
-        this.displayDialog = false;
+        let index = this.findSelectedItemIndex();
+
+        this.service
+            .deleteListItem(this.spForm, this.item)
+            .then(res => {
+                if (res) {
+                    this.DS['main'].items = this.DS['main'].items.filter((val, i) => i != index);
+                    this.item = null;
+                    this.displayDialog = false;
+                }
+            })
     }
 
     onRowSelect(event) {
-        this.newOrder = false;
-        this.order = this.cloneOrder(event.data);
+        this.newItem = false;
+        this.item = this.cloneItem(event.data);
         this.displayDialog = true;
     }
 
-    cloneOrder(c: Order): Order {
-        let order = new Order("");
+    cloneItem(c: Object, empty?: boolean): Object {
+        let _item = {};
         for (let prop in c) {
-            order[prop] = c[prop];
+            if (empty)
+                _item[prop] = undefined;
+            else
+                _item[prop] = c[prop];
         }
-        return <Order>order;
+        return _item;
     }
 
-    findSelectedOrderIndex(): number {
-        return this.orders.indexOf(this.selectedOrder);
+    findSelectedItemIndex(): number {
+        return this.DS['main'].items.indexOf(this.selectedItem);
     }
 }

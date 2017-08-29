@@ -1,7 +1,11 @@
-﻿import { Component, Inject, OnInit } from '@angular/core';
+﻿import { Component, OnInit, ViewChild } from '@angular/core';
+import { FormGroup, FormControl, FormArray, FormBuilder, Validators } from '@angular/forms';
 import { SpService } from '../../../sharepoint/sharepoint.service';
-
-import { operationRTK } from '../../../entities/';
+import {
+    SPForm, SPField, SPFields, VisibleColumns, SPModel, SPList,
+    getListFields, getVisibleColumns, getFormControls
+} from '../../../entities/spForm.entities';
+import { DataTable } from 'primeng/primeng';
 
 @Component({
     selector: 'rtk_operations',
@@ -9,66 +13,75 @@ import { operationRTK } from '../../../entities/';
     styleUrls: ['./rtk_operations.component.css'],
 })
 export class operationRTKComponent implements OnInit {
-    operation: operationRTK = new operationRTK("");
-    operations: operationRTK[];
-    cols: any[];
+    @ViewChild(DataTable) dataTable: DataTable;
+
+    myForm: FormGroup = new FormGroup({});
+    spForm: SPForm = new SPForm();
+    listFields: SPFields = {};
+    visibleCols: VisibleColumns[];
+    DS: SPModel;
+
+    //items: Array<Object>;
+    item: Object;
+    selectedItem: Object;
+    newItem: boolean;
     displayDialog: boolean;
 
-    selectedExemplar: operationRTK;
-    newExemplar: boolean;
+    constructor(private service: SpService, private _fb: FormBuilder) {
+        this.spForm.listName = 'List8';
+        this.spForm.listTitle = 'Операции РТК';
+        this.spForm.viewName = 'Все элементы';
 
-    constructor(private service: SpService) { }
+        this.DS['main'] = {
+            listName: this.spForm.listName,
+            listTitle: this.spForm.listTitle,
+            items: []
+        };
 
-    ngOnInit() {
         this.service
-            .getList<operationRTK>({ ListName: 'Операции РТК' }, operationRTK)
-            .then((items: operationRTK[]) => {
-                this.operations = items;
+            .getListColumns(this.spForm)
+            .then(data => {
+                this.getItems();
+                this.listFields = getListFields(data);
+                this.myForm = new FormGroup(getFormControls(this.listFields));
+                this.visibleCols = getVisibleColumns(data);
             });
+    }
 
-        this.cols = [
-            { field: 'ID', header: 'ИД' },
-            { field: 'Title', header: 'Наименование' },
-            { field: 'ComputedTechnologicalMap', header: 'Услуга' },
-            { field: 'RegionalTechnicalCenter', header: 'Региональный технический центр' },
-            { field: 'ProductAreas', header: 'Направление деятельности' },
-            { field: 'SpecialistsCategories', header: 'Категория специалиста' },
-            { field: 'ServiceObjectKind', header: 'Виды объектов обслуживания' },
-            { field: 'ServiceObjectAmount', header: 'Количество объектов обслуживания' },
-            { field: 'Town', header: 'Город' },
-            { field: 'BidSpecialist', header: 'Ставка' },
-            { field: 'StandartOperationNumber', header: 'Операций на 1 объект' },
-            { field: 'StandardTime', header: 'Время выполнения операции' },
-            { field: 'TotalAmount', header: 'Итого стоимость' },
-            { field: 'OperationType', header: 'Тип операции' },
-            { field: 'IsCritical', header: 'Критичная' }
-        ];
+    ngOnInit() { }
+
+    getItems() {
+        this.service
+            .getList<any>(this.spForm, this.listFields)
+            .then(items => {
+                this.DS['main'].items = items;
+            });
     }
 
     showDialogToAdd() {
-        this.newExemplar = true;
-        this.operation = new operationRTK("");
+        this.newItem = true;
+        this.item = this.cloneItem(this.selectedItem, true);
         this.displayDialog = true;
     }
 
     save() {
-        let operations = [...this.operations];
-        if (this.newExemplar) {
+        let _items = [...this.DS['main'].items];
+        if (this.newItem) {
             this.service
-                .addListItem({ ListName: 'Операции РТК', ItemProps: this.operation })
+                .addListItem(this.spForm, this.item)
                 .then(newItem => {
-                    operations.push(newItem);
-                    this.operations = operations;
-                    this.operation = null;
+                    _items.push(newItem);
+                    this.DS['main'].items = _items;
+                    this.item = null;
                 });
         }
         else {
             this.service
-                .updateListItem({ ListName: 'Операции РТК', ItemProps: this.operation })
+                .updateListItem(this.spForm, this.item)
                 .then(item => {
-                    operations[this.findSelectedRTKIndex()] = this.operation;
-                    this.operations = operations;
-                    this.operation = null;
+                    _items[this.findSelectedItemIndex()] = this.item;
+                    this.DS['main'].items = _items;
+                    this.item = null;
                 });
         }
 
@@ -76,26 +89,37 @@ export class operationRTKComponent implements OnInit {
     }
 
     delete() {
-        let index = this.findSelectedRTKIndex();
-        
+        let index = this.findSelectedItemIndex();
+
         this.service
-            .deleteListItem({ ListName: 'Операции РТК', ItemProps: this.operation })
+            .deleteListItem(this.spForm, this.item)
             .then(res => {
                 if (res) {
-                    this.operation = null;
-                    this.operations = this.operations.filter((val, i) => i != index);
+                    this.DS['main'].items = this.DS['main'].items.filter((val, i) => i != index);
+                    this.item = null;
                     this.displayDialog = false;
                 }
             })
     }
 
     onRowSelect(event) {
-        this.newExemplar = false;
-        this.operation = Object.assign({}, event.data);
+        this.newItem = false;
+        this.item = this.cloneItem(event.data);
         this.displayDialog = true;
     }
 
-    findSelectedRTKIndex(): number {
-        return this.operations.indexOf(this.selectedExemplar);
+    cloneItem(c: Object, empty?: boolean): Object {
+        let _item = {};
+        for (let prop in c) {
+            if (empty)
+                _item[prop] = undefined;
+            else
+                _item[prop] = c[prop];
+        }
+        return _item;
+    }
+
+    findSelectedItemIndex(): number {
+        return this.DS['main'].items.indexOf(this.selectedItem);
     }
 }

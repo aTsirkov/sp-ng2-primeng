@@ -28,7 +28,7 @@ export class ActivityComponent implements OnInit {
     displayDialog: boolean;
 
     constructor(private service: SpService, private _fb: FormBuilder) {
-        this.spForm.listName = 'List15';
+        this.spForm.listName = 'List6';
         this.spForm.listTitle = 'Направления деятельности';
         this.spForm.viewName = 'Все элементы';
 

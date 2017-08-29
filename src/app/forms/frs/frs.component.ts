@@ -1,7 +1,11 @@
-﻿import { Component, OnInit } from '@angular/core';
+﻿import { Component, OnInit, ViewChild } from '@angular/core';
+import { FormGroup, FormControl, FormArray, FormBuilder, Validators } from '@angular/forms';
 import { SpService } from '../../sharepoint/sharepoint.service';
-
-import { FRS } from '../../entities/';
+import {
+    SPForm, SPField, SPFields, VisibleColumns, SPModel, SPList,
+    getListFields, getVisibleColumns, getFormControls
+} from '../../entities/spForm.entities';
+import { DataTable } from 'primeng/primeng';
 
 @Component({
     selector: 'frs',
@@ -10,82 +14,113 @@ import { FRS } from '../../entities/';
 
 })
 export class FRSComponent implements OnInit {
+    @ViewChild(DataTable) dataTable: DataTable;
 
-    frss: FRS[];
-    cols: any[];
+    myForm: FormGroup = new FormGroup({});
+    spForm: SPForm = new SPForm();
+    listFields: SPFields = {};
+    visibleCols: VisibleColumns[];
+    DS: SPModel;
+
+    //items: Array<Object>;
+    item: Object;
+    selectedItem: Object;
+    newItem: boolean;
     displayDialog: boolean;
 
-    frs: FRS = new FRS("");
-    selectedFRS: FRS;
-    newFRS: boolean;
+    constructor(private service: SpService, private _fb: FormBuilder) {
+        this.spForm.listName = 'List13';
+        this.spForm.listTitle = 'ФРС';
+        this.spForm.viewName = 'Все элементы';
 
+        this.DS['main'] = {
+            listName: this.spForm.listName,
+            listTitle: this.spForm.listTitle,
+            items: []
+        };
 
-    constructor( private service: SpService) {
+        this.service
+            .getListColumns(this.spForm)
+            .then(data => {
+                this.getItems();
+                this.listFields = getListFields(data);
+                this.myForm = new FormGroup(getFormControls(this.listFields));
+                this.visibleCols = getVisibleColumns(data);
+            });
     }
 
-    ngOnInit() {
+    ngOnInit() { }
+
+    getItems() {
         this.service
-            .getList<FRS>({ Listname: 'ФРС' }, FRS)
-            .then(frss => {
-                this.frss = frss;
+            .getList<any>(this.spForm, this.listFields)
+            .then(items => {
+                this.DS['main'].items = items;
             });
-        this.cols = [
-            { field: 'Title', header: 'Наименование' },
-            { field: 'RegionalTechnicalCenter', header: 'Региональный технический центр' },
-            { field: 'ProductAreas', header: 'Направление деятельности' },
-            { field: 'SpecialistCategory', header: 'Категория специалиста' },
-            { field: 'Town', header: 'Город' },
-            { field: 'BidSpecialist', header: 'Ставка' }
-              
-        ];
     }
 
     showDialogToAdd() {
-        this.newFRS = true;
-        this.frs = new FRS("");
+        this.newItem = true;
+        this.item = this.cloneItem(this.selectedItem, true);
         this.displayDialog = true;
     }
 
     save() {
-        let frss = [...this.frss];
-        if (this.newFRS)
-            frss.push(this.frs);
-        else
-            frss[this.findSelectedFRSIndex()] = this.frs;
-
-        this.service.updateListItem({ ListName: 'ФРС', ItemID: this.frs.ID, ItemProps: this.frs })
-            .then(res => {
-                if (res) {
-                    this.frss = frss;
-                    this.frs = null;
-                };
-            });
+        let _items = [...this.DS['main'].items];
+        if (this.newItem) {
+            this.service
+                .addListItem(this.spForm, this.item)
+                .then(newItem => {
+                    _items.push(newItem);
+                    this.DS['main'].items = _items;
+                    this.item = null;
+                });
+        }
+        else {
+            this.service
+                .updateListItem(this.spForm, this.item)
+                .then(item => {
+                    _items[this.findSelectedItemIndex()] = this.item;
+                    this.DS['main'].items = _items;
+                    this.item = null;
+                });
+        }
 
         this.displayDialog = false;
     }
 
     delete() {
-        let index = this.findSelectedFRSIndex();
-        this.frss = this.frss.filter((val, i) => i != index);
-        this.frs = null;
-        this.displayDialog = false;
+        let index = this.findSelectedItemIndex();
+
+        this.service
+            .deleteListItem(this.spForm, this.item)
+            .then(res => {
+                if (res) {
+                    this.DS['main'].items = this.DS['main'].items.filter((val, i) => i != index);
+                    this.item = null;
+                    this.displayDialog = false;
+                }
+            })
     }
 
     onRowSelect(event) {
-        this.newFRS = false;
-        this.frs = this.cloneFRS(event.data);
+        this.newItem = false;
+        this.item = this.cloneItem(event.data);
         this.displayDialog = true;
     }
 
-    cloneFRS(c: FRS): FRS {
-        let frs = new FRS("");
+    cloneItem(c: Object, empty?: boolean): Object {
+        let _item = {};
         for (let prop in c) {
-            frs[prop] = c[prop];
+            if (empty)
+                _item[prop] = undefined;
+            else
+                _item[prop] = c[prop];
         }
-        return <FRS>frs;
+        return _item;
     }
 
-    findSelectedFRSIndex(): number {
-        return this.frss.indexOf(this.selectedFRS);
+    findSelectedItemIndex(): number {
+        return this.DS['main'].items.indexOf(this.selectedItem);
     }
 }

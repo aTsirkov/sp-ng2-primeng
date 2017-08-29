@@ -1,7 +1,11 @@
-﻿import { Component, OnInit } from '@angular/core';
+﻿import { Component, OnInit, ViewChild } from '@angular/core';
+import { FormGroup, FormControl, FormArray, FormBuilder, Validators } from '@angular/forms';
 import { SpService } from '../../../sharepoint/sharepoint.service';
-
-import { SubcontractingRTK } from '../../../entities/';
+import {
+    SPForm, SPField, SPFields, VisibleColumns, SPModel, SPList,
+    getListFields, getVisibleColumns, getFormControls
+} from '../../../entities/spForm.entities';
+import { DataTable } from 'primeng/primeng';
 
 @Component({
     selector: 'rtk_subcontracting',
@@ -9,79 +13,113 @@ import { SubcontractingRTK } from '../../../entities/';
     styleUrls: ['./rtk_subcontracting.component.css'],
 })
 export class subcontractingRTKComponent implements OnInit {
+    @ViewChild(DataTable) dataTable: DataTable;
 
-    subs: SubcontractingRTK[];
-    cols: any[];
+    myForm: FormGroup = new FormGroup({});
+    spForm: SPForm = new SPForm();
+    listFields: SPFields = {};
+    visibleCols: VisibleColumns[];
+    DS: SPModel;
+
+    //items: Array<Object>;
+    item: Object;
+    selectedItem: Object;
+    newItem: boolean;
     displayDialog: boolean;
 
-    sub: SubcontractingRTK = new SubcontractingRTK("");
-    selectedSub: SubcontractingRTK;
-    newSub: boolean;
+    constructor(private service: SpService, private _fb: FormBuilder) {
+        this.spForm.listName = 'List9';
+        this.spForm.listTitle = 'Субподряд РТК';
+        this.spForm.viewName = 'Все элементы';
 
-    constructor( private service: SpService) {
-    }
+        this.DS['main'] = {
+            listName: this.spForm.listName,
+            listTitle: this.spForm.listTitle,
+            items: []
+        };
 
-    ngOnInit() {
         this.service
-            .getList<SubcontractingRTK>({ ListName: 'Субподряд РТК' }, SubcontractingRTK)
-            .then(subs => {
-                this.subs = subs;
+            .getListColumns(this.spForm)
+            .then(data => {
+                this.getItems();
+                this.listFields = getListFields(data);
+                this.myForm = new FormGroup(getFormControls(this.listFields));
+                this.visibleCols = getVisibleColumns(data);
             });
-        this.cols = [
-            { field: 'Title', header: 'Наименование' },
-            { field: 'ComputedTechnologicalMap', header: 'РТК' },
-            { field: 'Operations', header: 'Операция РТК' },
-            { field: 'Cost', header: 'Итого стоимость' }
-        ];
     }
 
+    ngOnInit() { }
+
+    getItems() {
+        this.service
+            .getList<any>(this.spForm, this.listFields)
+            .then(items => {
+                this.DS['main'].items = items;
+            });
+    }
 
     showDialogToAdd() {
-        this.newSub = true;
-        this.sub = new SubcontractingRTK("");
+        this.newItem = true;
+        this.item = this.cloneItem(this.selectedItem, true);
         this.displayDialog = true;
     }
 
     save() {
-        let operations = [...this.subs];
-        if (this.newSub)
-            operations.push(this.sub);
-        else
-            operations[this.findSelectedRTKIndex()] = this.sub;
-
-        this.service.updateListItem({ ListName: 'Субподряд РТК', ItemID: this.sub.ID, ItemProps: this.sub })
-            .then(res => {
-                if (res) {
-                    this.subs = operations;
-                    this.sub = null;
-                };
-            });
+        let _items = [...this.DS['main'].items];
+        if (this.newItem) {
+            this.service
+                .addListItem(this.spForm, this.item)
+                .then(newItem => {
+                    _items.push(newItem);
+                    this.DS['main'].items = _items;
+                    this.item = null;
+                });
+        }
+        else {
+            this.service
+                .updateListItem(this.spForm, this.item)
+                .then(item => {
+                    _items[this.findSelectedItemIndex()] = this.item;
+                    this.DS['main'].items = _items;
+                    this.item = null;
+                });
+        }
 
         this.displayDialog = false;
     }
 
     delete() {
-        let index = this.findSelectedRTKIndex();
-        this.subs = this.subs.filter((val, i) => i != index);
-        this.sub = null;
-        this.displayDialog = false;
+        let index = this.findSelectedItemIndex();
+
+        this.service
+            .deleteListItem(this.spForm, this.item)
+            .then(res => {
+                if (res) {
+                    this.DS['main'].items = this.DS['main'].items.filter((val, i) => i != index);
+                    this.item = null;
+                    this.displayDialog = false;
+                }
+            })
     }
 
     onRowSelect(event) {
-        this.newSub = false;
-        this.sub = this.cloneCenter(event.data);
+        this.newItem = false;
+        this.item = this.cloneItem(event.data);
         this.displayDialog = true;
     }
 
-    cloneCenter(c: SubcontractingRTK): SubcontractingRTK {
-        let uni_rtk = new SubcontractingRTK("");
+    cloneItem(c: Object, empty?: boolean): Object {
+        let _item = {};
         for (let prop in c) {
-            uni_rtk[prop] = c[prop];
+            if (empty)
+                _item[prop] = undefined;
+            else
+                _item[prop] = c[prop];
         }
-        return <SubcontractingRTK>uni_rtk;
+        return _item;
     }
 
-    findSelectedRTKIndex(): number {
-        return this.subs.indexOf(this.selectedSub);
+    findSelectedItemIndex(): number {
+        return this.DS['main'].items.indexOf(this.selectedItem);
     }
 }

@@ -1,8 +1,11 @@
-﻿import { Component, OnInit } from '@angular/core';
+﻿import { Component, OnInit, ViewChild } from '@angular/core';
+import { FormGroup, FormControl, FormArray, FormBuilder, Validators } from '@angular/forms';
 import { SpService } from '../../../sharepoint/sharepoint.service';
-import { SelectItem } from 'primeng/primeng';
-
-import { ExemplarRTK, RTC, ServiceСatalog, StatusEnum } from '../../../entities/';
+import {
+    SPForm, SPField, SPFields, VisibleColumns, SPModel, SPList,
+    getListFields, getVisibleColumns, getFormControls
+} from '../../../entities/spForm.entities';
+import { DataTable } from 'primeng/primeng';
 
 @Component({
     selector: 'rtk_exemplar',
@@ -10,123 +13,113 @@ import { ExemplarRTK, RTC, ServiceСatalog, StatusEnum } from '../../../entities
     styleUrls: ['./rtk_exemplar.component.css'],
 })
 export class exemplarRTKComponent implements OnInit {
+    @ViewChild(DataTable) dataTable: DataTable;
 
-    exemplars: ExemplarRTK[];
-    cols: any[];
+    myForm: FormGroup = new FormGroup({});
+    spForm: SPForm = new SPForm();
+    listFields: SPFields = {};
+    visibleCols: VisibleColumns[];
+    DS: SPModel;
+
+    //items: Array<Object>;
+    item: Object;
+    selectedItem: Object;
+    newItem: boolean;
     displayDialog: boolean;
 
-    exemplar: ExemplarRTK = new ExemplarRTK("");
-    selectedExemplar: ExemplarRTK;
-    newExemplar: boolean;
+    constructor(private service: SpService, private _fb: FormBuilder) {
+        this.spForm.listName = 'List14';
+        this.spForm.listTitle = 'Экземпляры РТК';
+        this.spForm.viewName = 'Все элементы';
 
-    statuses: SelectItem[];
-    selectedStatus: string;
+        this.DS['main'] = {
+            listName: this.spForm.listName,
+            listTitle: this.spForm.listTitle,
+            items: []
+        };
 
-    // rtcsMas: RTC[];
-    // servicesMas: ServiceСatalog[];
-
-
-    rtcs: SelectItem[];
-    services: SelectItem[];
-    selectedRTC: string;
-    selectedService: string;
-
-
-
-    constructor( private service: SpService) {
-
-        this.statuses = [];
-        this.statuses.push({ label: 'Проект', value: 'Проект' });
-        this.statuses.push({ label: 'Активна', value: 'Активна' });
-        this.statuses.push({ label: 'Архив', value: 'Архив' });
-        
+        this.service
+            .getListColumns(this.spForm)
+            .then(data => {
+                this.getItems();
+                this.listFields = getListFields(data);
+                this.myForm = new FormGroup(getFormControls(this.listFields));
+                this.visibleCols = getVisibleColumns(data);
+            });
     }
 
+    ngOnInit() { }
 
-    ngOnInit() {
+    getItems() {
         this.service
-            .getList<ExemplarRTK>({ ListName: 'Экземпляры РТК' }, ExemplarRTK)
-            .then(exemplars => {
-                this.exemplars = exemplars;
+            .getList<any>(this.spForm, this.listFields)
+            .then(items => {
+                this.DS['main'].items = items;
             });
-
-        this.service
-            .getList<ServiceСatalog>({ ListName: 'Каталог услуг' }, ServiceСatalog)
-            .then(services => {
-                this.services = services.map(i => { return {label: i.Title, value: i} });
-                this.services.push({ label: null, value: null });
-            });
-
-        this.service
-            .getList<RTC>({ ListName: 'Региональные технические центры' }, RTC)
-            .then(rtcs => {              
-                this.rtcs = rtcs.map(i => { return { label: i.Title, value: i } });
-                this.rtcs.push({ label: null, value: null });         
-            });
-
-        this.cols = 
-            [
-            { field: 'Title', header: 'Наименование' },
-            { field: 'ServiceCatalog', header: 'Услуга' },
-            { field: 'RegionalTechnicalCenter', header: 'РТЦ-владелец договора' },
-            { field: 'CompanyCustomer', header: 'Заказчик' },
-            { field: 'Agreement', header: 'Код договора' },
-            { field: 'OperationAmount', header: 'Сумма по операциям' },
-            { field: 'MaterialAmount', header: 'Сумма по материалам' },
-            { field: 'SubcontractingAmount', header: 'Сумма по субподряду' },
-            { field: 'ActiveAmount', header: 'Сумма по активам' },
-            { field: 'TotalAmount', header: 'Сумма по РТК' },
-            { field: 'Status', header: 'Статус' },
-            { field: 'Unified', header: 'Унифицирована' }
-        ];
     }
 
     showDialogToAdd() {
-        this.newExemplar = true;
-        this.exemplar = new ExemplarRTK("");
+        this.newItem = true;
+        this.item = this.cloneItem(this.selectedItem, true);
         this.displayDialog = true;
     }
 
     save() {
-        let uni_rtks = [...this.exemplars];
-        if (this.newExemplar)
-            uni_rtks.push(this.exemplar);
-        else
-            uni_rtks[this.findSelectedRTKIndex()] = this.exemplar;
-
-        this.service.updateListItem({ ListName: 'Экземпляры РТК', ItemID: this.exemplar.ID, ItemProps: this.exemplar })
-            .then(res => {
-                if (res) {
-                    this.exemplars = uni_rtks;
-                    this.exemplar = null;                };
-            });
-
+        let _items = [...this.DS['main'].items];
+        if (this.newItem) {
+            this.service
+                .addListItem(this.spForm, this.item)
+                .then(newItem => {
+                    _items.push(newItem);
+                    this.DS['main'].items = _items;
+                    this.item = null;
+                });
+        }
+        else {
+            this.service
+                .updateListItem(this.spForm, this.item)
+                .then(item => {
+                    _items[this.findSelectedItemIndex()] = this.item;
+                    this.DS['main'].items = _items;
+                    this.item = null;
+                });
+        }
 
         this.displayDialog = false;
     }
 
     delete() {
-        let index = this.findSelectedRTKIndex();
-        this.exemplars = this.exemplars.filter((val, i) => i != index);
-        this.exemplar = null;
-        this.displayDialog = false;
+        let index = this.findSelectedItemIndex();
+
+        this.service
+            .deleteListItem(this.spForm, this.item)
+            .then(res => {
+                if (res) {
+                    this.DS['main'].items = this.DS['main'].items.filter((val, i) => i != index);
+                    this.item = null;
+                    this.displayDialog = false;
+                }
+            })
     }
 
     onRowSelect(event) {
-        this.newExemplar = false;
-        this.exemplar = this.cloneExemplar(event.data);
+        this.newItem = false;
+        this.item = this.cloneItem(event.data);
         this.displayDialog = true;
     }
 
-    cloneExemplar(c: ExemplarRTK): ExemplarRTK {
-        let uni_rtk = new ExemplarRTK("");
+    cloneItem(c: Object, empty?: boolean): Object {
+        let _item = {};
         for (let prop in c) {
-            uni_rtk[prop] = c[prop];
+            if (empty)
+                _item[prop] = undefined;
+            else
+                _item[prop] = c[prop];
         }
-        return <ExemplarRTK>uni_rtk;
+        return _item;
     }
 
-    findSelectedRTKIndex(): number {
-        return this.exemplars.indexOf(this.selectedExemplar);
+    findSelectedItemIndex(): number {
+        return this.DS['main'].items.indexOf(this.selectedItem);
     }
 }

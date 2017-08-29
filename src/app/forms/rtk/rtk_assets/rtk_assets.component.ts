@@ -1,8 +1,11 @@
-﻿import { Component, OnInit } from '@angular/core';
+﻿import { Component, OnInit, ViewChild } from '@angular/core';
+import { FormGroup, FormControl, FormArray, FormBuilder, Validators } from '@angular/forms';
 import { SpService } from '../../../sharepoint/sharepoint.service';
-
-import { AssetsRTK } from '../../../entities/';
-
+import {
+    SPForm, SPField, SPFields, VisibleColumns, SPModel, SPList,
+    getListFields, getVisibleColumns, getFormControls
+} from '../../../entities/spForm.entities';
+import { DataTable } from 'primeng/primeng';
 
 @Component({
     selector: 'rtk_assets',
@@ -10,80 +13,113 @@ import { AssetsRTK } from '../../../entities/';
     styleUrls: ['./rtk_assets.component.css'],
 })
 export class assetsRTKComponent implements OnInit {
+    @ViewChild(DataTable) dataTable: DataTable;
 
-    assets: AssetsRTK[];
-    cols: any[];
+    myForm: FormGroup = new FormGroup({});
+    spForm: SPForm = new SPForm();
+    listFields: SPFields = {};
+    visibleCols: VisibleColumns[];
+    DS: SPModel;
+
+    //items: Array<Object>;
+    item: Object;
+    selectedItem: Object;
+    newItem: boolean;
     displayDialog: boolean;
 
-    asset: AssetsRTK = new AssetsRTK("");
-    selectedAsset: AssetsRTK;
-    newAsset: boolean;
+    constructor(private service: SpService, private _fb: FormBuilder) {
+        this.spForm.listName = 'List12';
+        this.spForm.listTitle = 'Активы РТК';
+        this.spForm.viewName = 'Все элементы';
 
-    constructor( private service: SpService) {
+        this.DS['main'] = {
+            listName: this.spForm.listName,
+            listTitle: this.spForm.listTitle,
+            items: []
+        };
+
+        this.service
+            .getListColumns(this.spForm)
+            .then(data => {
+                this.getItems();
+                this.listFields = getListFields(data);
+                this.myForm = new FormGroup(getFormControls(this.listFields));
+                this.visibleCols = getVisibleColumns(data);
+            });
     }
 
-    ngOnInit() {
+    ngOnInit() { }
+
+    getItems() {
         this.service
-            .getList<AssetsRTK>({ ListName: 'Активы РТК' }, AssetsRTK)
-            .then(assets => {
-                this.assets = assets;
+            .getList<any>(this.spForm, this.listFields)
+            .then(items => {
+                this.DS['main'].items = items;
             });
-        this.cols = [
-            { field: 'Title', header: 'Наименование' },
-            { field: 'ComputedTechnologicalMap', header: 'РТК' },
-            { field: 'Operations', header: 'Операция РТК' },
-            { field: 'Cost', header: 'Стоимость' },
-            { field: 'Count', header: 'Amount' },
-            { field: 'TotalAmount', header: 'Итого стоимость' }
-        ];
     }
 
     showDialogToAdd() {
-        this.newAsset = true;
-        this.asset = new AssetsRTK("");
+        this.newItem = true;
+        this.item = this.cloneItem(this.selectedItem, true);
         this.displayDialog = true;
     }
 
     save() {
-        let uni_rtks = [...this.assets];
-        if (this.newAsset)
-            uni_rtks.push(this.asset);
-        else
-            uni_rtks[this.findSelectedRTKIndex()] = this.asset;
-
-        this.service.updateListItem({ ListName: 'Активы РТК', ItemID: this.asset.ID, ItemProps: this.asset })
-            .then(res => {
-                if (res) {
-                    this.assets = uni_rtks;
-                    this.asset = null;
-                };
-            });
+        let _items = [...this.DS['main'].items];
+        if (this.newItem) {
+            this.service
+                .addListItem(this.spForm, this.item)
+                .then(newItem => {
+                    _items.push(newItem);
+                    this.DS['main'].items = _items;
+                    this.item = null;
+                });
+        }
+        else {
+            this.service
+                .updateListItem(this.spForm, this.item)
+                .then(item => {
+                    _items[this.findSelectedItemIndex()] = this.item;
+                    this.DS['main'].items = _items;
+                    this.item = null;
+                });
+        }
 
         this.displayDialog = false;
     }
 
     delete() {
-        let index = this.findSelectedRTKIndex();
-        this.assets = this.assets.filter((val, i) => i != index);
-        this.asset = null;
-        this.displayDialog = false;
+        let index = this.findSelectedItemIndex();
+
+        this.service
+            .deleteListItem(this.spForm, this.item)
+            .then(res => {
+                if (res) {
+                    this.DS['main'].items = this.DS['main'].items.filter((val, i) => i != index);
+                    this.item = null;
+                    this.displayDialog = false;
+                }
+            })
     }
 
     onRowSelect(event) {
-        this.newAsset = false;
-        this.asset = this.cloneAsset(event.data);
+        this.newItem = false;
+        this.item = this.cloneItem(event.data);
         this.displayDialog = true;
     }
 
-    cloneAsset(c: AssetsRTK): AssetsRTK {
-        let uni_rtk = new AssetsRTK("");
+    cloneItem(c: Object, empty?: boolean): Object {
+        let _item = {};
         for (let prop in c) {
-            uni_rtk[prop] = c[prop];
+            if (empty)
+                _item[prop] = undefined;
+            else
+                _item[prop] = c[prop];
         }
-        return <AssetsRTK>uni_rtk;
+        return _item;
     }
 
-    findSelectedRTKIndex(): number {
-        return this.assets.indexOf(this.selectedAsset);
+    findSelectedItemIndex(): number {
+        return this.DS['main'].items.indexOf(this.selectedItem);
     }
 }
