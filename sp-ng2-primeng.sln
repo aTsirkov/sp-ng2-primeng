@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}") = "Germiona", "Germiona.njsproj", "{B4056029-C4C5-4D93-91C3-B7DBE72013DE}"
+Project("{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}") = "sp-ng2-primeng", "sp-ng2-primeng.njsproj", "{B4056029-C4C5-4D93-91C3-B7DBE72013DE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
