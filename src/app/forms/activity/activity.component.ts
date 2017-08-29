@@ -1,7 +1,11 @@
-﻿import { Component, OnInit } from '@angular/core';
+﻿import { Component, OnInit, ViewChild } from '@angular/core';
+import { FormGroup, FormControl, FormArray, FormBuilder, Validators } from '@angular/forms';
 import { SpService } from '../../sharepoint/sharepoint.service';
-
-import { Activity } from '../../entities/';
+import {
+    SPForm, SPField, SPFields, VisibleColumns, SPModel, SPList,
+    getListFields, getVisibleColumns, getFormControls
+} from '../../entities/spForm.entities';
+import { DataTable } from 'primeng/primeng';
 
 @Component({
     selector: 'activity',
@@ -9,80 +13,113 @@ import { Activity } from '../../entities/';
     styleUrls: ['./activity.component.css'],
 })
 export class ActivityComponent implements OnInit {
-     activities: Activity[];
-    cols: any[];
+    @ViewChild(DataTable) dataTable: DataTable;
+
+    myForm: FormGroup = new FormGroup({});
+    spForm: SPForm = new SPForm();
+    listFields: SPFields = {};
+    visibleCols: VisibleColumns[];
+    DS: SPModel;
+
+    //items: Array<Object>;
+    item: Object;
+    selectedItem: Object;
+    newItem: boolean;
     displayDialog: boolean;
 
-    activity: Activity = new Activity("");
-    selectedActivity: Activity;
-    newActivity: boolean;
+    constructor(private service: SpService, private _fb: FormBuilder) {
+        this.spForm.listName = 'List15';
+        this.spForm.listTitle = 'Направления деятельности';
+        this.spForm.viewName = 'Все элементы';
 
+        this.DS['main'] = {
+            listName: this.spForm.listName,
+            listTitle: this.spForm.listTitle,
+            items: []
+        };
 
-    constructor(private service: SpService) {
+        this.service
+            .getListColumns(this.spForm)
+            .then(data => {
+                this.getItems();
+                this.listFields = getListFields(data);
+                this.myForm = new FormGroup(getFormControls(this.listFields));
+                this.visibleCols = getVisibleColumns(data);
+            });
     }
 
-    ngOnInit() {
+    ngOnInit() { }
+
+    getItems() {
         this.service
-            .getList<Activity>({ ListName: 'Направления деятельности' }, Activity)
-            .then(activities => {
-                this.activities = activities;
+            .getList<any>(this.spForm, this.listFields)
+            .then(items => {
+                this.DS['main'].items = items;
             });
-        this.cols = [
-            { field: 'Title', header: 'Наименование' }
-
-            
-        ];
-
-        console.log('Направления деятельности');
     }
 
     showDialogToAdd() {
-        this.newActivity = true;
-        this.activity = new Activity("");
+        this.newItem = true;
+        this.item = this.cloneItem(this.selectedItem, true);
         this.displayDialog = true;
     }
 
     save() {
-        let activities = [...this.activities];
-        if (this.newActivity)
-            activities.push(this.activity);
-        else
-            activities[this.findSelectedActivityIndex()] = this.activity;
-
-        this.service.updateListItem({ ListName: 'Направления деятельности', ItemID: this.activity.ID, ItemProps: this.activity })
-            .then(res => {
-                if (res) {
-                    this.activities = activities;
-                    this.activity = null;
-                };
-            });
+        let _items = [...this.DS['main'].items];
+        if (this.newItem) {
+            this.service
+                .addListItem(this.spForm, this.item)
+                .then(newItem => {
+                    _items.push(newItem);
+                    this.DS['main'].items = _items;
+                    this.item = null;
+                });
+        }
+        else {
+            this.service
+                .updateListItem(this.spForm, this.item)
+                .then(item => {
+                    _items[this.findSelectedItemIndex()] = this.item;
+                    this.DS['main'].items = _items;
+                    this.item = null;
+                });
+        }
 
         this.displayDialog = false;
     }
 
     delete() {
-        let index = this.findSelectedActivityIndex();
-        this.activities = this.activities.filter((val, i) => i != index);
-        this.activity = null;
-        this.displayDialog = false;
+        let index = this.findSelectedItemIndex();
+
+        this.service
+            .deleteListItem(this.spForm, this.item)
+            .then(res => {
+                if (res) {
+                    this.DS['main'].items = this.DS['main'].items.filter((val, i) => i != index);
+                    this.item = null;
+                    this.displayDialog = false;
+                }
+            })
     }
 
     onRowSelect(event) {
-        this.newActivity = false;
-        this.activity = this.cloneObject(event.data);
+        this.newItem = false;
+        this.item = this.cloneItem(event.data);
         this.displayDialog = true;
     }
 
-    cloneObject(c: Activity): Activity {
-        let center = new Activity("");
+    cloneItem(c: Object, empty?: boolean): Object {
+        let _item = {};
         for (let prop in c) {
-            center[prop] = c[prop];
+            if (empty)
+                _item[prop] = undefined;
+            else
+                _item[prop] = c[prop];
         }
-        return <Activity>center;
+        return _item;
     }
 
-    findSelectedActivityIndex(): number {
-        return this.activities.indexOf(this.selectedActivity);
+    findSelectedItemIndex(): number {
+        return this.DS['main'].items.indexOf(this.selectedItem);
     }
 }
-

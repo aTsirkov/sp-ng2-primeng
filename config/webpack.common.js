@@ -121,24 +121,24 @@ module.exports = {
             /angular(\\|\/)core(\\|\/)@angular/,
             /angular(\\|\/)core(\\|\/)(esm(\\|\/)src|src)(\\|\/)linker/,
             helpers.root('../src'), { }
-        )/*,
+        ),
         new SPSaveWebpackPlugin({
             "coreOptions": {
                 "checkin": true,
                 "checkinType": 1,
-                "siteUrl": "http://win-fhs38e94km0"   //"http://win-fhs38e94km0/sites/Develop"   // "http://s502as-its-sp01/sites/RTMonitor/"
+                "siteUrl": "http://s502as-its-sp01/sites/RTMonitor/"   // "http://win-fhs38e94km0/sites/Develop"
             },
             "credentialOptions": {
-                //username: 'zamyatinavs',
-                //password: 'Veronika16',
-                // domain: 'sibur'
-                username: 'Администратор',
-                password: 'aTsirkov3005',
-                domain: 'win-fhs38e94km0'
+                username: 'tsirkovaa',
+                password: 'qwe12345678-=',
+                domain: 'sibur'
+                //username: 'Администратор',
+                //password: 'aTsirkov3005',
+                //domain: 'win-fhs38e94km0'
             },
             "fileOptions": {
                 "folder": "SiteAssets/GermionaT"
             }
-        })*/
+        })
     ]
 };

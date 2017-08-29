@@ -1,20 +1,17 @@
 ﻿import { Injectable, OnDestroy } from '@angular/core';
 
 import pnp, { List, Items, Item } from 'sp-pnp-js';
-
+import { SPForm, SPFields } from '../entities/spForm.entities';
 const adldapFactory = require('adldap')();
-
-import { IModelItem, ModelItems, ModelList } from './test/model.entities';
-import { SelectDecoratorsParser, SelectDecoratorsArrayParser } from "./parser/SelectDecoratorsParsers";
 
 @Injectable()
 export class SpService {
     private client = adldapFactory({
-        searchUser: 'dn=zirkov@mail.ru', //'dn=tsirkovaa,ou=accounts,dn=sibur,dn=local',
-        searchUserPass: 'TsirkovAA', //'qwe12345678-=',
+        searchUser: 'dn=tsirkovaa,ou=accounts,dn=sibur,dn=local',
+        searchUserPass: 'qwe12345678-=',
         ldapjs: {
-            url: 'LDAP://127.0.0.1:398',     //'ldaps://ad.sibur.local',
-            searchBase: '*', //'dn=sibur,dn=local',
+            url: 'ldaps://ad.sibur.local',
+            searchBase: 'dn=sibur,dn=local',
             scope: 'sub'
         }
     });
@@ -23,16 +20,11 @@ export class SpService {
         pnp.setup({
             headers: {
                 'Accept': 'application/json; odata=verbose',
-                // "content-Type": "application/json;odata=verbose"
             },
         });
     }
 
-    private getFilterString(fltArr: string[]): string {
-        return "(InternalName eq " + fltArr.join(") or (InternalName eq ") + ")";
-    }
-
-    public getADUsers():Promise<any> {
+    public getADUsers(): Promise<any> {
         //var res: Promise<any>;
         return this.client.bind()
             .then(() => {
@@ -42,53 +34,75 @@ export class SpService {
                     .then(() => this.client.unbind())
             })
             .catch((err) => console.error(err));
-//return res;
+        //return res;
     }
 
-    public getListColumns(params: any = {}): Promise<any> {
+    public getListColumns(params: SPForm): Promise<any> {
         let l: List = pnp.sp.web.lists
-            .getByTitle(params.ListName || params);
+            .getByTitle(params.listName);       //list
 
         return l
             .views
-            .getByTitle(params.ViewName || "Все элементы")
+            .getByTitle(params.viewName || "Все элементы")
             .fields
             .get()
-            .then(vf => {
+            .then(vf => {   // view fields
                 return l
                     .fields
-                    .select("Title", "InternalName", "TypeAsString", "Required", "EnforceUniqueValues", "ReadOnlyField")
-                    //.filter(this.getFilterString(vf.Items.results))
+                    .filter("(Hidden eq false and ReadOnlyField eq false) or InternalName eq 'ID' or InternalName eq 'Author' or InternalName eq 'Editor' or InternalName eq 'Created' or InternalName eq 'Modfied'")
+                    .select("Title", "InternalName", "TypeAsString", "Required", "EnforceUniqueValues", "ReadOnlyField", "DefaultValue", "MaxLength", "ValidationFormula", "ValidationMessage", "Choices", "LookupField", "LookupList")
                     .get()
-                    .then(data => {
-                        return data
-                            .filter(i => { return vf.Items.results.indexOf(i.InternalName) > -1 })
-                            .map(v => {
-                                return {
-                                    idx:  vf.Items.results.indexOf(v.InternalName),
-                                    field: v.InternalName,
-                                    header: v.Title,
-                                    fieldType: v.TypeAsString,
-                                    required: v.Required,
-                                    readOnly: v.ReadOnlyField,
-                                    unique: v.EnforceUniqueValues
+                    .then((res: any[]) => { // list fields
+                        return res.map(v => {
+                            return {
+                                idx: vf.Items.results.indexOf(v.InternalName) < 0 ? 9999 : vf.Items.results.indexOf(v.InternalName),
+                                field: v.InternalName,
+                                header: v.Title,
+                                fieldType: v.TypeAsString,
+                                required: v.Required,
+                                readOnly: v.ReadOnlyField,
+                                unique: v.EnforceUniqueValues,
+                                hidden: vf.Items.results.indexOf(v.InternalName) > -1 ? false : true,
+                                defaultValue: v.DefaultValue,
+                                maxLength: v.MaxLength,
+                                validationFormula: v.ValidationFormula,
+                                validationMessage: v.ValidationMessage,
+                                choices: v.Choices ? v.Choices.results
+                                    .map(i => {
+                                        return { label: i, value: i }
+                                    }) : undefined,
+                                lookupField: v.LookupField,
+                                lookupList: v.LookupList,
+                                isVirtual: false
+                            };
+                        })
+                    })
+                    .then(r => {
+                        let prom = r
+                            .map(i => {
+                                if (i.lookupList) {
+                                    return pnp.sp.web.lists.getById(i.lookupList).get()
+                                        .then(ll => {
+                                            i.lookupList = ll.Title;
+                                            return i;
+                                        });
                                 }
-                            })
-                            .sort((l, r) => {
-                                return l.idx < r.idx ? -1 : 1;
+                                else return i;
                             });
+                        return Promise.all(prom)
+                            .then(response => response);
                     });
             });
     }
 
-    public getList<T>(params: any = {}, icor: IModelItem<T>): Promise<T[]> {
+    public getList<T>(params: SPForm, fields: SPFields): Promise<T[]> {
         let l = pnp.sp.web.lists
-            .getByTitle(params.ListName || params)
-            .as(ModelList);
+            .getByTitle(params.listTitle)
 
         return l
             .items
-            .select(params.Fields)
+            .expand(this.expand(fields))
+            .select(this.select(fields))
             //.getAs<T>(new SelectDecoratorsArrayParser<T>(icor, true))
             .get()
             .then((data: any[]) => {
@@ -97,10 +111,8 @@ export class SpService {
             });
     }
 
-    public updateListItem(params: any = {}) {
-        var props = params.ItemProps;
-
-        return pnp.sp.web.lists.getByTitle(params.ListName)
+    public updateListItem(params: SPForm, props: any) {
+        return pnp.sp.web.lists.getByTitle(params.listTitle)
             .items
             .getById(props.ID)
             .update(props)
@@ -109,11 +121,9 @@ export class SpService {
             });
     }
 
-    public addListItem(params: any = {}) {
-        var props = params.ItemProps;
-
+    public addListItem(params: SPForm, props: any) {
         return pnp.sp.web.lists
-            .getByTitle(params.ListName)
+            .getByTitle(params.listTitle)
             .items
             .add(props)
             .then(res => {
@@ -121,11 +131,9 @@ export class SpService {
             });
     }
 
-    public deleteListItem(params: any = {}) {
-        var props = params.ItemProps;
-
+    public deleteListItem(params: SPForm, props: any) {
         return pnp.sp.web.lists
-            .getByTitle(params.ListName)
+            .getByTitle(params.listTitle)
             .items
             .getById(props.ID)
             .delete()
@@ -143,11 +151,30 @@ export class SpService {
             }, {});
     }
 
-    private updateProps(target: any, source: any): any{
+    private updateProps(target: any, source: any): any {
         return Object.keys(target)
             .reduce((obj, key) => {
                 obj[key] = source[key];
                 return obj;
             }, {});
+    }
+
+    private select(fld: SPFields): string {
+        let s: string[] = [];
+        Object.keys(fld).forEach(f => {
+            if (fld[f].fieldType === "User" || fld[f].fieldType === "Lookup")
+                s.push(fld[f].field + '/Title');
+            else
+                s.push(fld[f].field);
+        });
+        return s.join(',');
+    }
+
+    private expand(fld: SPFields): string {
+        let e: string[] = [];
+        Object.keys(fld).forEach(f => {
+            if (fld[f].fieldType === "User" || fld[f].fieldType === "Lookup") e.push(fld[f].field + '/Title');
+        });
+        return e.join(',');
     }
 }

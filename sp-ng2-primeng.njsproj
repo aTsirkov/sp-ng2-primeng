@@ -130,8 +130,6 @@
     <TypeScriptCompile Include="src\app\forms\services\srv_catalog\srv_catalog.component.ts" />
     <TypeScriptCompile Include="src\app\forms\services\object_kind\srv_obj_kind.component.ts" />
     <TypeScriptCompile Include="src\app\forms\specialist\specialist.component.ts" />
-    <TypeScriptCompile Include="src\app\sharepoint\model\MyDocumentCollection.ts" />
-    <TypeScriptCompile Include="src\app\sharepoint\model\MyItem.ts" />
     <TypeScriptCompile Include="src\app\sharepoint\parser\SelectDecoratorsParsers.ts" />
     <TypeScriptCompile Include="src\app\sharepoint\sharepoint.service.ts" />
     <TypeScriptCompile Include="src\app\sharepoint\sharepoint.settings.ts" />
@@ -175,7 +173,6 @@
     <Folder Include="src\app\forms\price\" />
     <Folder Include="src\app\forms\orders\" />
     <Folder Include="src\app\forms\rtk\" />
-    <Folder Include="src\app\sharepoint\model\" />
     <Folder Include="src\app\sharepoint\test\" />
     <Folder Include="src\app\sharepoint\parser\" />
     <Folder Include="src\app\sharepoint\utils\" />
