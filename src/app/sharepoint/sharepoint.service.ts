@@ -2,11 +2,13 @@
 
 import pnp, { List, Items, Item } from 'sp-pnp-js';
 import { SPForm, SPFields } from '../entities/spForm.entities';
-const adldapFactory = require('adldap')();
+
+//const adldapFactory = require('adldap');
+//var adldapFactory = require('adldap')();
 
 @Injectable()
 export class SpService {
-    private client = adldapFactory({
+    /*private client = adldapFactory({
         searchUser: 'dn=tsirkovaa,ou=accounts,dn=sibur,dn=local',
         searchUserPass: 'qwe12345678-=',
         ldapjs: {
@@ -14,7 +16,7 @@ export class SpService {
             searchBase: 'dn=sibur,dn=local',
             scope: 'sub'
         }
-    });
+    });*/
 
     constructor() {
         pnp.setup({
@@ -24,7 +26,7 @@ export class SpService {
         });
     }
 
-    public getADUsers(): Promise<any> {
+    /*public getADUsers(): Promise<any> {
         //var res: Promise<any>;
         return this.client.bind()
             .then(() => {
@@ -35,21 +37,21 @@ export class SpService {
             })
             .catch((err) => console.error(err));
         //return res;
-    }
+    }*/
 
     public getListColumns(params: SPForm): Promise<any> {
         let l: List = pnp.sp.web.lists
-            .getByTitle(params.listName);       //list
+            .getByTitle(params.listTitle);       //list
 
         return l
             .views
-            .getByTitle(params.viewName || "Все элементы")
+            .getByTitle(params.viewName)    // || "Все элементы"
             .fields
             .get()
             .then(vf => {   // view fields
                 return l
                     .fields
-                    .filter("(Hidden eq false and ReadOnlyField eq false) or InternalName eq 'ID' or InternalName eq 'Author' or InternalName eq 'Editor' or InternalName eq 'Created' or InternalName eq 'Modfied'")
+                    .filter("(Hidden eq false and ReadOnlyField eq false and InternalName ne 'ContentType') or InternalName eq 'ID' or InternalName eq 'Author' or InternalName eq 'Editor' or InternalName eq 'Created' or InternalName eq 'Modfied'")
                     .select("Title", "InternalName", "TypeAsString", "Required", "EnforceUniqueValues", "ReadOnlyField", "DefaultValue", "MaxLength", "ValidationFormula", "ValidationMessage", "Choices", "LookupField", "LookupList")
                     .get()
                     .then((res: any[]) => { // list fields

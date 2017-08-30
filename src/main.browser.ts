@@ -7,8 +7,6 @@ import 'primeng/resources/themes/kasper/theme.css';
 import 'font-awesome/css/font-awesome.min.css';
 import 'primeng/resources/primeng.min.css';
 
-//const adldapFactory = require('adldap');
-
 export const platformRef = platformBrowserDynamic();
 
 export function main() {

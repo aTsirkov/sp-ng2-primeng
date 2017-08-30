@@ -1,37 +1,23 @@
-﻿import { Component, OnInit, ViewChild } from '@angular/core';
-import { FormGroup, FormControl, FormArray, FormBuilder, Validators } from '@angular/forms';
-import { SpService } from '../../sharepoint/sharepoint.service';
-import {
-    SPForm, SPField, SPFields, VisibleColumns, SPModel, SPList,
-    getListFields, getVisibleColumns, getFormControls
-} from '../../entities/spForm.entities';
+﻿import { Component } from '@angular/core';
+import { FormGroup } from '@angular/forms';
+import { SpService } from '../sharepoint/sharepoint.service';
+import { SPForm, SPFields, SPField, VisibleColumns, SPModel, getListFields, getVisibleColumns, getFormControls } from '../entities/spForm.entities';
 import { DataTable } from 'primeng/primeng';
 
-@Component({
-    selector: 'test',
-    templateUrl: './test.component.html',
-    styleUrls: ['./test.component.css'],
-})
+export class TemplateComponent{
+    public myForm: FormGroup = new FormGroup({});
+    public spForm: SPForm = new SPForm();
+    public listFields: SPFields = {};
+    public visibleCols: VisibleColumns[];
+    public DS: SPModel = new SPModel();
 
-export class TestComponent implements OnInit {
-    @ViewChild(DataTable) dataTable: DataTable;
+    public item: Object;
+    public selectedItem: Object;
+    public newItem: boolean;
+    public displayDialog: boolean;
 
-    myForm: FormGroup = new FormGroup({});
-    spForm: SPForm = new SPForm();
-    listFields: SPFields = {};
-    visibleCols: VisibleColumns[];
-    DS: SPModel = new SPModel();
-
-    //items: Array<Object>;
-    item: Object;
-    selectedItem: Object;
-    newItem: boolean;
-    displayDialog: boolean;
-
-    constructor(private service: SpService, private _fb: FormBuilder) {
-        this.spForm.listName = 'TestSPList';
-        this.spForm.listTitle = 'Тест';
-        this.spForm.viewName = 'Все элементы';
+    constructor(private service: SpService, private spform: SPForm) {
+        this.spForm = spform;
 
         this.DS['main'] = {
             listName: this.spForm.listName,
@@ -41,21 +27,36 @@ export class TestComponent implements OnInit {
 
         this.service
             .getListColumns(this.spForm)
-            .then(data => {
-                this.getItems();
+            .then((data: SPField[]) => {
+                this.getDS('main', this.spForm, this.listFields);
                 this.listFields = getListFields(data);
                 this.myForm = new FormGroup(getFormControls(this.listFields));
                 this.visibleCols = getVisibleColumns(data);
             });
     }
 
-    ngOnInit() { }
+    updateDM(item: any) {
+        Object.keys(this.listFields)
+            .filter(f => this.listFields[f].lookupList && !this.listFields[f].readOnly)
+            .forEach(i => {
+                var sf: SPForm = new SPForm();
+                sf.listTitle = this.listFields[i].lookupList;
+                sf.viewName = 'Options';
+                sf.filter = 'ID eq ' + item[this.listFields[i].lookupField];
 
-    getItems() {
+                var lf: SPFields = new SPFields;
+                lf['ID'] = { idx: 1, field: 'ID', header: 'ID'};
+                lf[this.listFields[i].lookupField] = { idx: 2, field: this.listFields[i].lookupField, header: this.listFields[i].lookupField };
+
+                this.getDS(sf.listTitle, sf, lf);
+            });
+    }
+
+    getDS(DSname: string, spform: SPForm, listFld: SPFields) {
         this.service
-            .getList<any>(this.spForm, this.listFields)
+            .getList<any>(spform, listFld)
             .then(items => {
-                this.DS['main'].items = items;
+                this.DS[DSname].items = items;
             });
     }
 
@@ -77,8 +78,12 @@ export class TestComponent implements OnInit {
                 });
         }
         else {
+            let updateObject: Object = new Object;
+            Object.keys(this.listFields).forEach(i => {
+                updateObject[i] = this.item[i];
+            }, this);
             this.service
-                .updateListItem(this.spForm, this.item)
+                .updateListItem(this.spForm, updateObject)
                 .then(item => {
                     _items[this.findSelectedItemIndex()] = this.item;
                     this.DS['main'].items = _items;

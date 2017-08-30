@@ -8,11 +8,11 @@ export class SPField {
         idx: number;
         field: string;
         header: string;
-        fieldType: string
-        required: boolean;
-        readOnly: boolean;
-        unique: boolean;
-        hidden: boolean;
+        fieldType?: string
+        required?: boolean;
+        readOnly?: boolean;
+        unique?: boolean;
+        hidden?: boolean;
         defaultValue?: any;
         maxLength?: number;
         validationFormula?: string;
@@ -21,7 +21,7 @@ export class SPField {
         lookupField?: string;
         lookupList?: string;
         parentList?: string;
-        isVirtual: boolean;
+        isVirtual?: boolean;
 }
 export class VisibleColumns {
     field: string;
@@ -43,10 +43,10 @@ export class SPList {
 }
 
 export class SPForm {
-    listName: string;
+    listName?: string;
     listTitle: string;
-    viewName: string;
-    filter: string
+    viewName?: string;
+    filter?: string;
 }
 
 export function getVisibleColumns(data: SPField[]): VisibleColumns[]{

@@ -1,78 +1,87 @@
-﻿<h3>Каталог </h3>
+﻿<p-dataTable class="table" [value]="DS.main.items" selectionMode="single" [(selection)]="selectedItem"
+             (onRowDblclick)="onRowSelect($event)" [responsive]="true" scrollable="true" scrollHeight="600px">
 
-<p-dataTable class="table" [value]="operations" selectionMode="single" [(selection)]="selectedExemplar" (onRowSelect)="onRowSelect($event)" [paginator]="true" rows="15" [pageLinks]="3" [rowsPerPageOptions]="[5,10,20]" [responsive]="true">
-    <p-column *ngFor="let col of cols" [field]="col.field" [header]="col.header"></p-column>
+    <p-column *ngFor="let col of visibleCols" [field]="col.field" [header]="col.header"></p-column>
+
     <p-footer>
-        <div class="ui-helper-clearfix" >  <!--style="width:100%"-->
+        <div class="ui-helper-clearfix">
             <button type="button" pButton icon="fa-plus" style="float:left" (click)="showDialogToAdd()" label="Add"></button>
         </div>
     </p-footer>
 </p-dataTable>
 
-<p-dialog  header="Информация об унифицированных РТК" [(visible)]="displayDialog" [responsive]="true" showEffect="fade" [modal]="true">
-    <div class="ui-grid ui-grid-responsive ui-fluid" *ngIf="operation">
-        <div class="ui-grid-row">
-            <div class="ui-grid-col-4"><label for="Title">Название</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="Title" [(ngModel)]="operation.Title" /></div>
-        </div>
-        <div class="ui-grid-row">
-            <div class="ui-grid-col-4"><label for="ComputedTechnologicalMap">Услуга</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="ComputedTechnologicalMap" [(ngModel)]="operation.ComputedTechnologicalMap" /></div>
-        </div>
-        <div class="ui-grid-row">
-            <div class="ui-grid-col-4"><label for="RegionalTechnicalCenter">Региональный технический центр</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="RegionalTechnicalCenter" [(ngModel)]="operation.RegionalTechnicalCenter" /></div>
-        </div>
-        <div class="ui-grid-row">
-            <div class="ui-grid-col-4"><label for="ProductAreas">Направление деятельности</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="ProductAreas" [(ngModel)]="operation.ProductAreas" /></div>
-        </div>
-        <div class="ui-grid-row">
-            <div class="ui-grid-col-4"><label for="SpecialistsCategories">Категория специалиста</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="SpecialistsCategories" [(ngModel)]="operation.SpecialistsCategories" /></div>
-        </div>
-        <div class="ui-grid-row">
-            <div class="ui-grid-col-4"><label for="ServiceObjectKind">Виды объектов обслуживания</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="ServiceObjectKind" [(ngModel)]="operation.ServiceObjectKind" /></div>
-        </div>
-        <div class="ui-grid-row">
-            <div class="ui-grid-col-4"><label for="ServiceObjectAmount">Количество объектов обслуживания</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="ServiceObjectAmount" [(ngModel)]="operation.ServiceObjectAmount" /></div>
-        </div>
-        <div class="ui-grid-row">
-            <div class="ui-grid-col-4"><label for="Town">Город</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="Town" [(ngModel)]="operation.Town" /></div>
-        </div>
-        <div class="ui-grid-row">
-            <div class="ui-grid-col-4"><label for="BidSpecialist">Ставка</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="BidSpecialist" [(ngModel)]="operation.BidSpecialist" /></div>
-        </div>
-        <div class="ui-grid-row">
-            <div class="ui-grid-col-4"><label for="StandartOperationNumber">Операций на 1 объект</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="StandartOperationNumber" [(ngModel)]="operation.StandartOperationNumber" /></div>
-        </div>
-        <div class="ui-grid-row">
-            <div class="ui-grid-col-4"><label for="StandardTime">Время выполнения операции</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="StandardTime" [(ngModel)]="operation.StandardTime" /></div>
-        </div>
-        <div class="ui-grid-row">
-            <div class="ui-grid-col-4"><label for="TotalAmount">Итого стоимость</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="TotalAmount" [(ngModel)]="operation.TotalAmount" /></div>
-        </div>
-        <div class="ui-grid-row">
-            <div class="ui-grid-col-4"><label for="OperationType">Тип операции</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="OperationType" [(ngModel)]="operation.OperationType" /></div>
-        </div>
-        <div class="ui-grid-row">
-            <div class="ui-grid-col-4"><label for="IsCritical">Критичная</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="IsCritical" [(ngModel)]="operation.IsCritical" /></div>
-        </div>
+<p-dialog header="Операции РТК" [(visible)]="displayDialog" [responsive]="true" showEffect="fade" [modal]="true">
+    <form [formGroup]="myForm">
+        <div class="ui-grid ui-grid-responsive ui-fluid" *ngIf="item">
+            <div class="ui-grid-row">
+                <div class="ui-grid-col-4"><label for="Title">Название</label></div>
+                <div class="ui-grid-col-8"><input pInputText id="Title" [(ngModel)]="item.Title" formControlName="Title"/></div>
+            </div>
+            <div class="ui-grid-row">
+                <div class="ui-grid-col-4"><label for="ComputedTechnologicalMap">Услуга</label></div>
+                <div class="ui-grid-col-8"><input pInputText id="ComputedTechnologicalMap" [(ngModel)]="item.ComputedTechnologicalMap" formControlName="ComputedTechnologicalMap"/></div>
+            </div>
+            <div class="ui-grid-row">
+                <div class="ui-grid-col-4"><label for="RegionalTechnicalCenter">Региональный технический центр</label></div>
+                <div class="ui-grid-col-8"><input pInputText id="RegionalTechnicalCenter" [(ngModel)]="item.RegionalTechnicalCenter" formControlName="RegionalTechnicalCenter"/></div>
+            </div>
+            <div class="ui-grid-row">
+                <div class="ui-grid-col-4"><label for="ProductAreas">Направление деятельности</label></div>
+                <div class="ui-grid-col-8"><input pInputText id="ProductAreas" [(ngModel)]="item.ProductAreas" formControlName="ProductAreas"/></div>
+            </div>
+            <div class="ui-grid-row">
+                <div class="ui-grid-col-4"><label for="SpecialistCategory">Категория специалиста</label></div>
+                <div class="ui-grid-col-8"><input pInputText id="SpecialistCategory" [(ngModel)]="item.SpecialistCategory" formControlName="SpecialistCategory"/></div>
+            </div>
+            <div class="ui-grid-row">
+                <div class="ui-grid-col-4"><label for="ServiceObjectKind">Виды объектов обслуживания</label></div>
+                <div class="ui-grid-col-8"><input pInputText id="ServiceObjectKind" [(ngModel)]="item.ServiceObjectKind" formControlName="ServiceObjectKind"/></div>
+            </div>
+            <div class="ui-grid-row">
+                <div class="ui-grid-col-4"><label for="ServiceObjectAmount">Количество объектов обслуживания</label></div>
+                <div class="ui-grid-col-8"><input pInputText id="ServiceObjectAmount" [(ngModel)]="item.ServiceObjectAmount" formControlName="ServiceObjectAmount"/></div>
+            </div>
+            <div class="ui-grid-row">
+                <div class="ui-grid-col-4"><label for="Town">Город</label></div>
+                <div class="ui-grid-col-8"><input pInputText id="Town" [(ngModel)]="item.Town" formControlName="Town"/></div>
+            </div>
+            <div class="ui-grid-row">
+                <div class="ui-grid-col-4"><label for="BidSpecialist">Ставка</label></div>
+                <div class="ui-grid-col-8"><input pInputText id="BidSpecialist" [(ngModel)]="item.BidSpecialist" formControlName="BidSpecialist"/></div>
+            </div>
+            <div class="ui-grid-row">
+                <div class="ui-grid-col-4"><label for="StandartOperationNumber">Операций на 1 объект</label></div>
+                <div class="ui-grid-col-8"><input pInputText id="StandartOperationNumber" [(ngModel)]="item.StandartOperationNumber" formControlName="StandartOperationNumber"/></div>
+            </div>
+            <div class="ui-grid-row">
+                <div class="ui-grid-col-4"><label for="StandardTime">Время выполнения операции</label></div>
+                <div class="ui-grid-col-8"><input pInputText id="StandardTime" [(ngModel)]="item.StandardTime" formControlName="StandardTime"/></div>
+            </div>
+            <div class="ui-grid-row">
+                <div class="ui-grid-col-4"><label for="TotalAmount">Итого стоимость</label></div>
+                <div class="ui-grid-col-8"><input pInputText id="TotalAmount" [(ngModel)]="item.TotalAmount" formControlName="TotalAmount"/></div>
+            </div>
+            <div class="ui-grid-row">
+                <div class="ui-grid-col-4"><label for="OperationType">Тип операции</label></div>
+                <div class="ui-grid-col-8">
+                    <p-dropdown id="OperationType" [options]="listFields.OperationType.choices" [(ngModel)]="item.OperationType"
+                                formControlName="OperationType" appendTo="body" [style]="{'width':'150px'}"></p-dropdown>
+                </div>
+            </div>
+            <div class="ui-grid-row">
+                <div class="ui-grid-col-4"><label for="IsCritical">Критичная</label></div>
+                <div class="ui-grid-col-8">
+                    <p-dropdown id="IsCritical" [options]="listFields.IsCritical.choices" [(ngModel)]="item.IsCritical"
+                                formControlName="IsCritical" appendTo="body" [style]="{'width':'150px'}"></p-dropdown>
+                </div>
+            </div>
 
-    </div>
-    <p-footer>
-        <div class="ui-dialog-buttonpane ui-helper-clearfix">
-            <button type="button" pButton icon="fa-close" (click)="delete()" label="Delete"></button>
-            <button type="button" pButton icon="fa-check" (click)="save()" label="Save"></button>
         </div>
-    </p-footer>
+        <p-footer>
+            <div class="ui-dialog-buttonpane ui-helper-clearfix">
+                <button type="button" pButton icon="fa-close" (click)="delete()" label="Delete"></button>
+                <button type="button" pButton icon="fa-check" (click)="save()" label="Save"></button>
+            </div>
+        </p-footer>
+    </form>
 </p-dialog>

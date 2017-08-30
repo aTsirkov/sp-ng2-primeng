@@ -107,9 +107,9 @@ module.exports = {
         new webpack.optimize.CommonsChunkPlugin({
             name: ['main', 'polyfills']
         }),
-        new CopyWebpackPlugin([{
+        /*new CopyWebpackPlugin([{
             from: 'src/static', to: 'static'
-        }]),
+        }]),*/
         new webpack.LoaderOptionsPlugin({
             debug: true
         }),

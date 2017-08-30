@@ -40,6 +40,8 @@
     <Content Include="src\app\app.component.html" />
     <Content Include="src\app\forms\activity\activity.component.css" />
     <Content Include="src\app\forms\activity\activity.component.html" />
+    <Content Include="src\app\forms\test\test.component.css" />
+    <Content Include="src\app\forms\test\test.component.html" />
     <Content Include="src\app\forms\company\company.component.css" />
     <Content Include="src\app\forms\company\company.component.html" />
     <Content Include="src\app\forms\customer\customer.component.css" />
@@ -109,6 +111,8 @@
     <TypeScriptCompile Include="src\app\entities\operationRTK.entities.ts" />
     <TypeScriptCompile Include="src\app\entities\rtc.entities.ts" />
     <TypeScriptCompile Include="src\app\forms\activity\activity.component.ts" />
+    <TypeScriptCompile Include="src\app\forms\test\test.component.ts" />
+    <TypeScriptCompile Include="src\app\forms\form.template.ts" />
     <TypeScriptCompile Include="src\app\forms\company\company.component.ts" />
     <TypeScriptCompile Include="src\app\entities\catalog.enums.ts" />
     <TypeScriptCompile Include="src\app\forms\customer\customer.component.ts" />
@@ -155,6 +159,7 @@
     <Folder Include="src\app\forms\customer\" />
     <Folder Include="src\app\forms\activity\" />
     <Folder Include="src\app\forms\frs\" />
+    <Folder Include="src\app\forms\test\" />
     <Folder Include="src\app\forms\rtcenter\" />
     <Folder Include="src\app\forms\order\" />
     <Folder Include="src\app\forms\rtk\rtk_assets\" />

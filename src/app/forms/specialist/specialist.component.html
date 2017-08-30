@@ -1,9 +1,10 @@
-﻿<h3>Каталог </h3>
+﻿<p-dataTable class="table" [value]="DS.main.items" selectionMode="single" [(selection)]="selectedItem"
+             (onRowDblclick)="onRowSelect($event)" [responsive]="true" scrollable="true" scrollHeight="600px">
 
-<p-dataTable class="table" [value]="categories" selectionMode="single" [(selection)]="selectedCategory" (onRowSelect)="onRowSelect($event)" [paginator]="true" rows="15" [pageLinks]="3" [rowsPerPageOptions]="[5,10,20]" [responsive]="true">
-    <p-column *ngFor="let col of cols" [field]="col.field" [header]="col.header"></p-column>
+    <p-column *ngFor="let col of visibleCols" [field]="col.field" [header]="col.header"></p-column>
+
     <p-footer>
-        <div class="ui-helper-clearfix" >  <!--style="width:100%"-->
+        <div class="ui-helper-clearfix">
             <button type="button" pButton icon="fa-plus" style="float:left" (click)="showDialogToAdd()" label="Add"></button>
         </div>
     </p-footer>
@@ -13,11 +14,14 @@
     <div class="ui-grid ui-grid-responsive ui-fluid" *ngIf="category">
         <div class="ui-grid-row">
             <div class="ui-grid-col-4"><label for="Title">Название</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="Title" [(ngModel)]="category.Title" /></div>
+            <div class="ui-grid-col-8"><input pInputText id="Title" [(ngModel)]="item.Title" /></div>
         </div>
         <div class="ui-grid-row">
             <div class="ui-grid-col-4"><label for="ProductAreas">Направление деятельности</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="ProductAreas" [(ngModel)]="category.Title" /></div>
+            <div class="ui-grid-col-8">
+                <p-dropdown id="ProductAreas" [options]="listFields.ProductAreas.choices" [(ngModel)]="item.ProductAreas"
+                            formControlName="ProductAreas" appendTo="body"></p-dropdown>
+            </div>
         </div>
     </div>
     <p-footer>

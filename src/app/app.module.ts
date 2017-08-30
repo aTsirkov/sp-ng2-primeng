@@ -30,7 +30,7 @@ import { objectsRTKComponent } from './forms/rtk/rtk_objects/rtk_objects.compone
 
 import { SpService } from './sharepoint/sharepoint.service';
 // Test
-import { TestComponent } from './sharepoint/test/test.component';
+import { TestComponent } from './forms/test/test.component';
 
 import { LocationStrategy, HashLocationStrategy } from '@angular/common';
 import {

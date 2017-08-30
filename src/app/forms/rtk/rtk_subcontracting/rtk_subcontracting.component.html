@@ -1,9 +1,10 @@
-﻿<h3>Каталог </h3>
+﻿<p-dataTable class="table" [value]="DS.main.items" selectionMode="single" [(selection)]="selectedItem"
+             (onRowDblclick)="onRowSelect($event)" [responsive]="true" scrollable="true" scrollHeight="600px">
 
-<p-dataTable class="table" [value]="subs" selectionMode="single" [(selection)]="selectedSub" (onRowSelect)="onRowSelect($event)" [paginator]="true" rows="15" [pageLinks]="3" [rowsPerPageOptions]="[5,10,20]" [responsive]="true">
-    <p-column *ngFor="let col of cols" [field]="col.field" [header]="col.header"></p-column>
+    <p-column *ngFor="let col of visibleCols" [field]="col.field" [header]="col.header"></p-column>
+
     <p-footer>
-        <div class="ui-helper-clearfix" >  <!--style="width:100%"-->
+        <div class="ui-helper-clearfix">
             <button type="button" pButton icon="fa-plus" style="float:left" (click)="showDialogToAdd()" label="Add"></button>
         </div>
     </p-footer>

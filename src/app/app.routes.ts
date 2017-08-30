@@ -19,7 +19,7 @@ import { assetsRTKComponent } from './forms/rtk/rtk_assets/rtk_assets.component'
 import { materialsRTKComponent } from './forms/rtk/rtk_materials/rtk_materials.component';
 import { objectsRTKComponent } from './forms/rtk/rtk_objects/rtk_objects.component';
 // Test
-import { TestComponent } from './sharepoint/test/test.component';
+import { TestComponent } from './forms/test/test.component';
 
 export const rootRouterConfig: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
