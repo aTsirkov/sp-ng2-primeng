@@ -19,12 +19,6 @@ export class TemplateComponent{
     constructor(private service: SpService, private spform: SPForm) {
         this.spForm = spform;
 
-        this.DS['main'] = {
-            listName: this.spForm.listName,
-            listTitle: this.spForm.listTitle,
-            items: []
-        };
-
         this.service
             .getListColumns(this.spForm)
             .then((data: SPField[]) => {
@@ -56,6 +50,13 @@ export class TemplateComponent{
         this.service
             .getList<any>(spform, listFld)
             .then(items => {
+                if (this.DS[DSname] == undefined) {
+                    this.DS[DSname] = {
+                        listName: spform.listName,
+                        listTitle: spform.listTitle,
+                        items: []
+                    }
+                }
                 this.DS[DSname].items = items;
             });
     }
