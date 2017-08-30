@@ -36,7 +36,8 @@ export class TemplateComponent{
                 var sf: SPForm = new SPForm();
                 sf.listTitle = this.listFields[i].lookupList;
                 sf.viewName = 'Options';
-                sf.filter = 'ID eq ' + item[this.listFields[i].lookupField];
+                if (this.listFields[i].parentList)
+                    sf.filter = 'ID eq ' + item[i + '/' + this.listFields[i].lookupField];
 
                 var lf: SPFields = new SPFields;
                 lf['ID'] = { idx: 1, field: 'ID', header: 'ID'};
@@ -80,9 +81,12 @@ export class TemplateComponent{
         }
         else {
             let updateObject: Object = new Object;
-            Object.keys(this.listFields).forEach(i => {
-                updateObject[i] = this.item[i];
-            }, this);
+            Object.keys(this.listFields)
+                .filter(f => !this.listFields[f].readOnly)
+                .forEach(i => {
+                    updateObject[i] = this.item[i];
+                }, this);
+
             this.service
                 .updateListItem(this.spForm, updateObject)
                 .then(item => {

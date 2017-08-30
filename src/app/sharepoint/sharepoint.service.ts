@@ -164,8 +164,10 @@ export class SpService {
     private select(fld: SPFields): string {
         let s: string[] = [];
         Object.keys(fld).forEach(f => {
-            if (fld[f].fieldType === "User" || fld[f].fieldType === "Lookup")
-                s.push(fld[f].field + '/Title');
+            if (fld[f].fieldType === "User" || fld[f].fieldType === "Lookup") {
+                s.push(fld[f].field + '/ID');
+                s.push(fld[f].field + '/' + fld[f].lookupField);
+            }
             else
                 s.push(fld[f].field);
         });
@@ -175,7 +177,8 @@ export class SpService {
     private expand(fld: SPFields): string {
         let e: string[] = [];
         Object.keys(fld).forEach(f => {
-            if (fld[f].fieldType === "User" || fld[f].fieldType === "Lookup") e.push(fld[f].field + '/Title');
+            if (fld[f].fieldType === "User" || fld[f].fieldType === "Lookup")
+                e.push(fld[f].field);   // + '/' + fld[f].lookupField);
         });
         return e.join(',');
     }
