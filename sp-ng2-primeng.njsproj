@@ -85,6 +85,7 @@
     <Content Include="src\app\sharepoint\test\test.component.css" />
     <Content Include="src\app\sharepoint\test\test.component.html" />
     <Content Include="src\favicon.ico" />
+    <Content Include="src\Germiona.aspx" />
     <Content Include="src\index.html" />
     <Content Include="tsconfig.aot.json" />
     <Content Include="tsconfig.json" />

@@ -16,9 +16,19 @@ export class SRVcatalogComponent extends TemplateComponent {
             {
                 listName: 'ServiceCatalog',
                 listTitle: 'Каталог услуг',
-                viewName: 'Все элементы'
+                viewName: 'MinView'
             });
 
+    }
+
+    onRowSelect(event) {
+        this.updateDM(event.data)
+            .then(() => {
+                //super.onRowSelect(event));
+                this.newItem = false;
+                this.item = this.cloneItem(event.data);
+                this.displayDialog = true;
+            });
     }
 
 }

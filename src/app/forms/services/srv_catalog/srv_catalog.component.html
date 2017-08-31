@@ -1,4 +1,4 @@
-﻿<p-dataTable class="table" [value]="DS.main.items" selectionMode="single" [(selection)]="selectedItem"
+﻿<p-dataTable class="table" [value]="DS['main'].items" selectionMode="single" [(selection)]="selectedItem"
              (onRowDblclick)="onRowSelect($event)" [responsive]="true" scrollable="true" scrollHeight="600px">
 
     <p-column *ngFor="let col of visibleCols" [field]="col.field" [header]="col.header"></p-column>
@@ -10,153 +10,106 @@
     </p-footer>
 </p-dataTable>
 
-<p-dialog  header="Информация об услуге" [(visible)]="displayDialog" [responsive]="true" showEffect="fade" [modal]="true">
-    <div class="ui-grid ui-grid-responsive ui-fluid" *ngIf="catalog">
-        <div class="ui-grid-row">
-            <div style="-webkit-writing-mode: vertical-rl; writing-mode:tb-rl;" class="ui-grid-col-4"><label style="-webkit-transform: rotate(90deg); transform: rotate(90deg);" for="Title">Наименование</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="Title" [(ngModel)]="catalog.Title" /></div>
+<p-dialog header="Информация о заказчике" [(visible)]="displayDialog" [responsive]="true" showEffect="fade" [modal]="true" [width]="600" [contentStyle]="{'overflow':'visible'}">
+    <form [formGroup]="myForm">
+
+        <div class="ui-grid ui-grid-responsive ui-fluid" *ngIf="item">
+            <div class="ui-grid-row">
+                <div class="ui-grid-col-4"><label for="Еitle">Название</label></div>
+                <div class="ui-grid-col-8"><input pInputText id="Еitle" [(ngModel)]="item.Title" formControlName="Title" /></div>
+            </div>
+            <div class="ui-grid-row">
+                <div class="ui-grid-col-4"><label for="Status">Статус</label></div>
+                <p-dropdown id="Status" [options]="listFields.Status.choices" [(ngModel)]="item.Status"
+                            formControlName="Status" appendTo="body" [style]="{'width':'150px'}"></p-dropdown>
+            </div>
+            <div class="ui-grid-row">
+                <div class="ui-grid-col-4"><label for="MainItSystem">Ключевая ИТ-система</label></div>
+                <div class="ui-grid-col-8"><input pInputText id="MainItSystem" [(ngModel)]="item.MainItSystem" formControlName="MainItSystem" /></div>
+            </div>
+            <div class="ui-grid-row">
+                <div class="ui-grid-col-4"><label for="BoundariesServices">Границы использования</label></div>
+                <p-dropdown id="BoundariesServices" [options]="listFields.BoundariesServices.choices" [(ngModel)]="item.BoundariesServices"
+                            formControlName="BoundariesServices" appendTo="body" [style]="{'width':'150px'}"></p-dropdown>
+            </div>
+            <div class="ui-grid-row">
+                <div class="ui-grid-col-4"><label for="Type">Тип услуги</label></div>
+                <p-dropdown id="Type" [options]="listFields.Type.choices" [(ngModel)]="item.Type"
+                            formControlName="Type" appendTo="body" [style]="{'width':'150px'}"></p-dropdown>
+            </div>
+            <div class="ui-grid-row">
+                <div class="ui-grid-col-4"><label for="FunctionalAreas">Функциональные направления</label></div>
+                <p-dropdown id="FunctionalAreas" [options]="listFields.FunctionalAreas.choices" [(ngModel)]="item.FunctionalAreas"
+                            formControlName="FunctionalAreas" appendTo="body" [style]="{'width':'150px'}"></p-dropdown>
+            </div>
+            <div class="ui-grid-row">
+                <div class="ui-grid-col-4"><label for="ProductAreas">Продуктовые направления</label></div>
+                <div class="ui-grid-col-8">
+                    <p-dropdown id="ProductAreas" [options]="listFields.ProductAreas.choices" [(ngModel)]="item.ProductAreas"
+                                formControlName="ProductAreas" appendTo="body" [style]="{'width':'100%'}"></p-dropdown>
+                </div>
+            </div>
+            <div class="ui-grid-row">
+                <div class="ui-grid-col-4"><label for="ServiceObjectKindOwnerCompany">Организация-владелец ресурса</label></div>
+                <div class="ui-grid-col-8"><input pInputText id="ServiceObjectKindOwnerCompany" [(ngModel)]="item.ServiceObjectKindOwnerCompany" formControlName="ServiceObjectKindOwnerCompany" /></div>
+            </div>
+            <div class="ui-grid-row">
+                <div class="ui-grid-col-4"><label for="ServiceObjectKindOwnerBranch">Обособленное подразделение</label></div>
+                <div class="ui-grid-col-8"><input pInputText id="ServiceObjectKindOwnerBranch" [(ngModel)]="item.ServiceObjectKindOwnerBranch" formControlName="ServiceObjectKindOwnerBranch" /></div>
+            </div>
+            <div class="ui-grid-row">
+                <div class="ui-grid-col-4"><label for="ServiceObjectKindOwnerNote">Комментарий по владельцу ресурса</label></div>
+                <div class="ui-grid-col-8">
+                    <textarea pInputTextarea id="ServiceObjectKindOwnerNote" [(ngModel)]="item.ServiceObjectKindOwnerNote"
+                              formControlName="ServiceObjectKindOwnerNote"></textarea>
+                </div>
+            </div>
+            <div class="ui-grid-row">
+                <div class="ui-grid-col-4"><label for="FieldDescription">Описание площадки</label></div>
+                <div class="ui-grid-col-8"><input pInputText id="FieldDescription" [(ngModel)]="item.FieldDescription" formControlName="FieldDescription" /></div>
+            </div>            
+            <div class="ui-grid-row">
+                <div class="ui-grid-col-4"><label for="ServiceNameListId">Номенклатура услуг</label></div>
+                <div class="ui-grid-col-8">
+                    <p-dropdown id="ServiceNameListId" [options]="DS['Номенклатура услуг'].items" [(ngModel)]="item.ServiceNameListId"
+                                formControlName="ServiceNameListId" appendTo="body" [style]="{'width':'100%'}"></p-dropdown>
+                </div>
+            </div>
+            <div class="ui-grid-row">
+                <div class="ui-grid-col-4"><label for="ServiceObjectKindId">Вид объекта обслуживания</label></div>
+                <div class="ui-grid-col-8">
+                    <p-dropdown id="ServiceObjectKindID" [options]="DS['Виды объектов обслуживания'].items" [(ngModel)]="item.ServiceObjectKindId"
+                                formControlName="ServiceObjectKindId" appendTo="body" [style]="{'width':'100%'}"></p-dropdown>
+                </div>
+            </div>
+            <div class="ui-grid-row">
+                <div class="ui-grid-col-4"><label for="CompanyCustomerId">Заказчик по договору</label></div>
+                <div class="ui-grid-col-8">
+                    <p-dropdown id="CompanyCustomerId" [options]="DS['Заказчики'].items" [(ngModel)]="item.CompanyCustomerId"
+                                formControlName="CompanyCustomerId" appendTo="body" [style]="{'width':'100%'}"></p-dropdown>
+                </div>
+            </div>
+            <div class="ui-grid-row">
+                <div class="ui-grid-col-4"><label for="CompanyConsumerId">Наименование Предприятия-потребителя по договору</label></div>
+                <div class="ui-grid-col-8">
+                    <p-dropdown id="CompanyConsumerId" [options]="DS['Заказчики'].items" [(ngModel)]="item.CompanyConsumerId"
+                                formControlName="CompanyConsumerId" appendTo="body" [style]="{'width':'100%'}"></p-dropdown>
+                </div>
+            </div>
+            <div class="ui-grid-row">
+                <div class="ui-grid-col-4"><label for="RegionalTechnicalCenterId">РТЦ - владелец договора</label></div>
+                <div class="ui-grid-col-8">
+                    <p-dropdown id="RegionalTechnicalCenterId" [options]="DS['Региональные технические центры'].items" [(ngModel)]="item.RegionalTechnicalCenterId"
+                                formControlName="RegionalTechnicalCenterId" appendTo="body" [style]="{'width':'100%'}"></p-dropdown>
+                </div>
+            </div>
+
         </div>
-        <div class="ui-grid-row">
-            <div class="ui-grid-col-4"><label for="ServiceNameList">Номенклатура услуг</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="ServiceNameList" [(ngModel)]="catalog.ServiceNameList" /></div>
-        </div>
-        <div class="ui-grid-row">
-            <div class="ui-grid-col-4"><label for="Status">Статус</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="Status" [(ngModel)]="catalog.Status" /></div>
-        </div>
-        <div class="ui-grid-row">
-            <div class="ui-grid-col-4"><label for="ServiceObjectKind">Вид объекта обслуживания</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="ServiceObjectKind" [(ngModel)]="catalog.ServiceObjectKind" /></div>
-        </div>
-        <div class="ui-grid-row">
-            <div class="ui-grid-col-4"><label for="MainItSystem">Ключевая ИТ-система</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="MainItSystem" [(ngModel)]="catalog.MainItSystem" /></div>
-        </div> 
-        <div class="ui-grid-row">
-            <div class="ui-grid-col-4"><label for="BoundariesServices">Границы использования</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="BoundariesServices" [(ngModel)]="catalog.BoundariesServices" /></div>
-        </div>
-        <div class="ui-grid-row">
-            <div class="ui-grid-col-4"><label for="Type">Тип услуги</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="Type" [(ngModel)]="catalog.Type" /></div>
-        </div>
-        <div class="ui-grid-row">
-            <div class="ui-grid-col-4"><label for="FunctionalAreas">Функциональные направления</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="FunctionalAreas" [(ngModel)]="catalog.FunctionalAreas" /></div>
-        </div>
-        <div class="ui-grid-row">
-            <div class="ui-grid-col-4"><label for="ProductAreas">Продуктовые направления</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="ProductAreas" [(ngModel)]="catalog.ProductAreas" /></div>
-        </div>
-        <div class="ui-grid-row">
-            <div class="ui-grid-col-4"><label  for="ServiceObjectKindOwnerCompany">Организация-владелец ресурса'</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="ServiceObjectKindOwnerCompany" [(ngModel)]="catalog.ServiceObjectKindOwnerCompany" /></div>
-        </div>
-        <div class="ui-grid-row">
-            <div class="ui-grid-col-4"><label for="ServiceObjectKindOwnerBranch">Обособленное подразделение'</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="ServiceObjectKindOwnerBranch" [(ngModel)]="catalog.ServiceObjectKindOwnerBranch" /></div>
-        </div>      
-        <div class="ui-grid-row">
-            <div class="ui-grid-col-4"><label for="ServiceObjectKindOwner">Владелец ресурса</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="ServiceObjectKindOwner" [(ngModel)]="catalog.ServiceObjectKindOwner" /></div>
-        </div>
-        <div class="ui-grid-row">
-            <div class="ui-grid-col-4"><label for="ServiceObjectKindOwnerNote">Комментарий по владельцу ресурса</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="ServiceObjectKindOwnerNote" [(ngModel)]="catalog.ServiceObjectKindOwnerNote" /></div>
-        </div>
-        <div class="ui-grid-row">
-            <div class="ui-grid-col-4"><label for="CompanyCustomer">Заказчик по договору</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="CompanyCustomer" [(ngModel)]="catalog.CompanyCustomer" /></div>
-        </div>
-        <div class="ui-grid-row">
-            <div class="ui-grid-col-4"><label for="CompanyConsumer">Наименование Предприятия-потребителя по договору</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="CompanyConsumer" [(ngModel)]="catalog.CompanyConsumer" /></div>
-        </div>
-        <div class="ui-grid-row">
-            <div class="ui-grid-col-4"><label for="FieldDescription">Описание площадки</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="FieldDescription" [(ngModel)]="catalog.FieldDescription" /></div>
-        </div>
-        <div class="ui-grid-row">
-            <div class="ui-grid-col-4"><label for="ContractorName">Наименование Подрядчика</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="ContractorName" [(ngModel)]="catalog.ContractorName" /></div>
-        </div>
-        <div class="ui-grid-row">
-            <div class="ui-grid-col-4"><label for="ContractorACBNSI">Код АСВ НСИ Подрядчика</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="ContractorACBNSI" [(ngModel)]="catalog.ContractorACBNSI" /></div>
-        </div>
-        <div class="ui-grid-row">
-            <div class="ui-grid-col-4"><label for="ContractorESUID">Код ЕСУИД Подрядчика</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="ContractorESUID" [(ngModel)]="catalog.ContractorESUID" /></div>
-        </div>
-        <div class="ui-grid-row">
-            <div class="ui-grid-col-4"><label for="ContractorBranch">Обособленное подразделение Подрядчика</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="ContractorBranch" [(ngModel)]="catalog.ContractorBranch" /></div>
-        </div>
-        <div class="ui-grid-row">
-            <div class="ui-grid-col-4"><label for="CustomerServiceManager">Сервис-менеджер от Заказчика</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="CustomerServiceManager" [(ngModel)]="catalog.CustomerServiceManager" /></div>
-        </div>
-        <div class="ui-grid-row">
-            <div class="ui-grid-col-4"><label for="CustomerResponsiblePerson">Ответственный по договору со стороны заказчика</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="CustomerResponsiblePerson" [(ngModel)]="catalog.CustomerResponsiblePerson" /></div>
-        </div>
-        <div class="ui-grid-row">
-            <div class="ui-grid-col-4"><label for="EOL">ЕОЛ</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="EOL" [(ngModel)]="catalog.EOL" /></div>
-        </div>
-        <div class="ui-grid-row">
-            <div class="ui-grid-col-4"><label for="ROL">РОЛ</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="ROL" [(ngModel)]="catalog.ROL" /></div>
-        </div>
-        <div class="ui-grid-row">
-            <div class="ui-grid-col-4"><label for="Agreement">№ договора</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="Agreement" [(ngModel)]="catalog.Agreement" /></div>
-        </div>
-        <div class="ui-grid-row">
-            <div class="ui-grid-col-4"><label for="AgreementApplication">№ приложения</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="AgreementApplication" [(ngModel)]="catalog.AgreementApplication" /></div>
-        </div>
-        <div class="ui-grid-row">
-            <div class="ui-grid-col-4"><label for="AgreementSpecification">№ спецификации</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="AgreementSpecification" [(ngModel)]="catalog.AgreementSpecification" /></div>
-        </div>
-        <div class="ui-grid-row">
-            <div class="ui-grid-col-4"><label for="AdditionalAgreement">№ допсоглашения</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="AdditionalAgreement" [(ngModel)]="catalog.AdditionalAgreement" /></div>
-        </div>
-        <div class="ui-grid-row">
-            <div class="ui-grid-col-4"><label for="Renewal">Продление на следующий период</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="Renewal" [(ngModel)]="catalog.Renewal" /></div>
-        </div>
-        <div class="ui-grid-row">
-            <div class="ui-grid-col-4"><label for="Comment">Комментарии</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="Comment" [(ngModel)]="catalog.Comment" /></div>
-        </div>
-        <div class="ui-grid-row">
-            <div class="ui-grid-col-4"><label for="PacketName">Название пакета</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="PacketName" [(ngModel)]="catalog.PacketName" /></div>
-        </div>
-        <div class="ui-grid-row">
-            <div class="ui-grid-col-4"><label for="ServiceLayerName">Уровень обслуживания'</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="ServiceLayerName" [(ngModel)]="catalog.ServiceLayerName" /></div>
-        </div>
-        <div class="ui-grid-row">
-            <div class="ui-grid-col-4"><label for="AgreementType">Тип сервисного договора</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="AgreementType" [(ngModel)]="catalog.AgreementType" /></div>
-        </div>
-        <div class="ui-grid-row">
-            <div class="ui-grid-col-4"><label for="Description">Описание</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="Description" [(ngModel)]="catalog.Description" /></div>
-        </div>
-        <div class="ui-grid-row">
-            <div class="ui-grid-col-4"><label for="RegionalTechnicalCenter">РТЦ-владелец договора</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="RegionalTechnicalCenter" [(ngModel)]="catalog.RegionalTechnicalCenter" /></div>
-        </div>
-    </div>
-    <p-footer>
-        <div class="ui-dialog-buttonpane ui-helper-clearfix">
-            <button type="button" pButton icon="fa-close" (click)="delete()" label="Delete"></button>
-            <button type="button" pButton icon="fa-check" (click)="save()" label="Save"></button>
-        </div>
-    </p-footer>
+        <p-footer>
+            <div class="ui-dialog-buttonpane ui-helper-clearfix">
+                <button type="button" pButton icon="fa-close" (click)="delete()" label="Delete"></button>
+                <button type="button" pButton icon="fa-check" (click)="save()" label="Save"></button>
+            </div>
+        </p-footer>
+    </form>
 </p-dialog>

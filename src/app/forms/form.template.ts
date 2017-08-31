@@ -18,20 +18,26 @@ export class TemplateComponent{
 
     constructor(private service: SpService, private spform: SPForm) {
         this.spForm = spform;
+        this.DS['main'] = {
+            listName: spform.listName,
+            listTitle: spform.listTitle,
+            items: []
+        };
 
         this.service
             .getListColumns(this.spForm)
             .then((data: SPField[]) => {
-                this.getDS('main', this.spForm, this.listFields);
                 this.listFields = getListFields(data);
+                this.getDS('main', this.spForm, this.listFields);
                 this.myForm = new FormGroup(getFormControls(this.listFields));
                 this.visibleCols = getVisibleColumns(data);
             });
     }
 
-    updateDM(item: any) {
+    updateDM(item: any): Promise<any> {
+        var prom: Promise<any>[] = [];
         Object.keys(this.listFields)
-            .filter(f => this.listFields[f].lookupList && !this.listFields[f].readOnly)
+            .filter(f => this.listFields[f].lookupField && !this.listFields[f].readOnly)
             .forEach(i => {
                 var sf: SPForm = new SPForm();
                 sf.listTitle = this.listFields[i].lookupList;
@@ -40,15 +46,17 @@ export class TemplateComponent{
                     sf.filter = 'ID eq ' + item[i + '/' + this.listFields[i].lookupField];
 
                 var lf: SPFields = new SPFields;
-                lf['ID'] = { idx: 1, field: 'ID', header: 'ID'};
-                lf[this.listFields[i].lookupField] = { idx: 2, field: this.listFields[i].lookupField, header: this.listFields[i].lookupField };
+                lf['Id'] = { idx: 0, field: 'Id', header: 'Id' };
+                lf['ID'] = { idx: 1, field: 'ID', header: 'value' };
+                lf[this.listFields[i].lookupField] = { idx: 2, field: this.listFields[i].lookupField, header: 'label' };
 
-                this.getDS(sf.listTitle, sf, lf);
+                prom.push(this.getDS(sf.listTitle, sf, lf));
             });
+        return Promise.all(prom);
     }
 
-    getDS(DSname: string, spform: SPForm, listFld: SPFields) {
-        this.service
+    getDS(DSname: string, spform: SPForm, listFld: SPFields): Promise<any> {
+        return this.service
             .getList<any>(spform, listFld)
             .then(items => {
                 if (this.DS[DSname] == undefined) {
@@ -58,7 +66,17 @@ export class TemplateComponent{
                         items: []
                     }
                 }
-                this.DS[DSname].items = items;
+                if (DSname !== 'main')
+                    this.DS[DSname].items = items.map(i => {
+                        var r = {};
+                        Object.keys(listFld)
+                            .forEach(f => {
+                                r[listFld[f].header] = i[listFld[f].field];
+                            }, this)
+                        return r;
+                    });
+                else
+                    this.DS[DSname].items = items;
             });
     }
 
@@ -70,9 +88,25 @@ export class TemplateComponent{
 
     save() {
         let _items = [...this.DS['main'].items];
+
+        let updateObject: Object = new Object;
+        /*Object.keys(this.listFields)
+            .filter(f => ((!this.listFields[f].readOnly) || this.listFields[f].field == 'ID'))
+            .forEach(i => {
+                var ii;
+                if (this.listFields[i].lookupList)
+                    ii = i.slice(0, i.length - 2);
+                else
+                    ii = i;
+                updateObject[ii] = this.item[i];
+            }, this);*/
+        updateObject['RegionalTechnicalCenter'] = {};
+        updateObject['RegionalTechnicalCenter']['ID'] = 1;
+        updateObject['ID'] = 1;
+
         if (this.newItem) {
             this.service
-                .addListItem(this.spForm, this.item)
+                .addListItem(this.spForm, updateObject)
                 .then(newItem => {
                     _items.push(newItem);
                     this.DS['main'].items = _items;
@@ -80,13 +114,6 @@ export class TemplateComponent{
                 });
         }
         else {
-            let updateObject: Object = new Object;
-            Object.keys(this.listFields)
-                .filter(f => !this.listFields[f].readOnly)
-                .forEach(i => {
-                    updateObject[i] = this.item[i];
-                }, this);
-
             this.service
                 .updateListItem(this.spForm, updateObject)
                 .then(item => {
@@ -113,11 +140,11 @@ export class TemplateComponent{
             })
     }
 
-    onRowSelect(event) {
+    /*onRowSelect(event) {
         this.newItem = false;
         this.item = this.cloneItem(event.data);
         this.displayDialog = true;
-    }
+    }*/
 
     cloneItem(c: Object, empty?: boolean): Object {
         let _item = {};

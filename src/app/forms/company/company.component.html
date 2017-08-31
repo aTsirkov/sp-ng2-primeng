@@ -29,7 +29,7 @@
             <div class="ui-grid-row">
                 <div class="ui-grid-col-4"><label for="Test">Test</label></div>
                 <p-dropdown id="Test" [options]="listFields.Test.choices" [(ngModel)]="item.Test"
-                            formControlName="Test" appendTo="body"></p-dropdown>
+                            formControlName="Test" appendTo="body" [style]="{'width':'200px'}"></p-dropdown>
             </div>
         </div>
         <p-footer>

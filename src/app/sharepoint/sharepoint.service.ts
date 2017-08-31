@@ -58,7 +58,7 @@ export class SpService {
                         return res.map(v => {
                             return {
                                 idx: vf.Items.results.indexOf(v.InternalName) < 0 ? 9999 : vf.Items.results.indexOf(v.InternalName),
-                                field: v.InternalName,
+                                field: v.LookupList ? v.InternalName + 'Id' : v.InternalName,
                                 header: v.Title,
                                 fieldType: v.TypeAsString,
                                 required: v.Required,
@@ -164,9 +164,9 @@ export class SpService {
     private select(fld: SPFields): string {
         let s: string[] = [];
         Object.keys(fld).forEach(f => {
-            if (fld[f].fieldType === "User" || fld[f].fieldType === "Lookup") {
-                s.push(fld[f].field + '/ID');
-                s.push(fld[f].field + '/' + fld[f].lookupField);
+            if (/*fld[f].fieldType === "User" ||*/ fld[f].fieldType === "Lookup") {
+                s.push(fld[f].field.slice(0, fld[f].field.length - 2) + '/ID');
+                s.push(fld[f].field.slice(0, fld[f].field.length - 2) + '/' + fld[f].lookupField);
             }
             else
                 s.push(fld[f].field);
@@ -177,8 +177,8 @@ export class SpService {
     private expand(fld: SPFields): string {
         let e: string[] = [];
         Object.keys(fld).forEach(f => {
-            if (fld[f].fieldType === "User" || fld[f].fieldType === "Lookup")
-                e.push(fld[f].field);   // + '/' + fld[f].lookupField);
+            if (/*fld[f].fieldType === "User" ||*/ fld[f].fieldType === "Lookup")
+                e.push(fld[f].field.slice(0, fld[f].field.length - 2));   // + '/' + fld[f].lookupField);
         });
         return e.join(',');
     }
