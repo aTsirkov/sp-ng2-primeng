@@ -14,21 +14,20 @@ export class TestComponent extends TemplateComponent {
     constructor(private spservice: SpService) {
         super(spservice,
             {
-                listName: 'List15',
-                listTitle: 'Заказчики',
+                listName: 'TestSPList',
+                listTitle: 'TestSPList',
                 viewName: 'Все элементы'
             });
-       
     }
 
     onRowSelect(event) {
-        this.updateDM(event.data)
-            .then(() => {
+        /*this.updateDM(event.data)
+            .then(() => {*/
                 //super.onRowSelect(event));
                 this.newItem = false;
                 this.item = this.cloneItem(event.data);
                 this.displayDialog = true;
-            });
+            //});
     }
     
 }

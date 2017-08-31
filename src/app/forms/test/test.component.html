@@ -10,31 +10,38 @@
     </p-footer>
 </p-dataTable>
 
-<p-dialog  header="Информация о заказчике" [(visible)]="displayDialog" [responsive]="true" showEffect="fade" [modal]="true">
+<p-dialog header="Информация о заказчике" [(visible)]="displayDialog" [responsive]="true" showEffect="fade" [modal]="true">
     <form [formGroup]="myForm">
-
         <div class="ui-grid ui-grid-responsive ui-fluid" *ngIf="item">
             <div class="ui-grid-row">
                 <div class="ui-grid-col-4"><label for="title">Наименование</label></div>
-                <div class="ui-grid-col-8"><input pInputText id="title" [(ngModel)]="item.Title" formControlName="Title"/></div>
+                <div class="ui-grid-col-8"><input pInputText id="title" [(ngModel)]="item.Title" formControlName="Title" /></div>
             </div>
             <div class="ui-grid-row">
-                <div class="ui-grid-col-4"><label for="ACBNSI">Код Контрагента в АСВ НСИ</label></div>
-                <div class="ui-grid-col-8"><input pInputText id="ACBNSI" [(ngModel)]="item.ACBNSI" formControlName="ACBNSI"/></div>
+                <div class="ui-grid-col-4"><label for="ProductNumber">Product Number</label></div>
+                <div class="ui-grid-col-8"><input pInputText id="ProductNumber" [(ngModel)]="item.ProductNumber" formControlName="ProductNumber" /></div>
             </div>
             <div class="ui-grid-row">
-                <div class="ui-grid-col-4"><label for="ESUID">Код Контрагента ЕСУИД</label></div>
-                <div class="ui-grid-col-8"><input pInputText id="ESUID" [(ngModel)]="item.ESUID" formControlName="ESUID"/></div>
+                <div class="ui-grid-col-4"><label for="OrderDate">Order Date</label></div>
+                <div class="ui-grid-col-8"><input pInputText id="OrderDate" [(ngModel)]="item.OrderDate" formControlName="OrderDate" /></div>
             </div>
             <div class="ui-grid-row">
-                <div class="ui-grid-col-4"><label for="Test">Test</label></div>
-                <p-dropdown id="Test" [options]="listFields.Test.choices" [(ngModel)]="item.Test"
-                            formControlName="Test" appendTo="body" [style]="{'width':'150px'}"></p-dropdown>
+                <div class="ui-grid-col-4"><label for="OrderAmount">Order Amount</label></div>
+                <div class="ui-grid-col-8"><input pInputText id="OrderAmount" [(ngModel)]="item.OrderAmount" formControlName="OrderAmount" /></div>
             </div>
             <div class="ui-grid-row">
-                <div class="ui-grid-col-4"><label for="Test22ID">Test22</label></div>
-                <p-dropdown id="Test22ID" [options]="DS['Активы РТК'].items" [(ngModel)]="item.Test22Id"
-                            formControlName="Test22ID" appendTo="body" [style]="{'width':'150px'}"></p-dropdown>
+                <div class="ui-grid-col-4"><label for="ChoiceTest">Choice Test</label></div>
+                <div class="ui-grid-col-8">
+                    <p-dropdown id="ChoiceTest" [options]="listFields.ChoiceTest.choices" [(ngModel)]="item.ChoiceTest"
+                                formControlName="ChoiceTest" appendTo="body" [style]="{'width':'100%'}"></p-dropdown>
+                </div>
+            </div>
+            <div class="ui-grid-row">
+                <div class="ui-grid-col-4"><label for="LookupTest">Lookup Test</label></div>
+                <div class="ui-grid-col-8">
+                    <p-dropdown id="LookupTest" [options]="DS['Employee'].items" [(ngModel)]="item.LookupTest"
+                                formControlName="LookupTest" appendTo="body" [style]="{'width':'100%'}"></p-dropdown>
+                </div>
             </div>
         </div>
         <p-footer>

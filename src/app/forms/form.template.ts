@@ -31,10 +31,11 @@ export class TemplateComponent{
                 this.getDS('main', this.spForm, this.listFields);
                 this.myForm = new FormGroup(getFormControls(this.listFields));
                 this.visibleCols = getVisibleColumns(data);
+                this.updateDM();
             });
     }
 
-    updateDM(item: any): Promise<any> {
+    updateDM(item?: any): Promise<any> {
         var prom: Promise<any>[] = [];
         Object.keys(this.listFields)
             .filter(f => this.listFields[f].lookupField && !this.listFields[f].readOnly)
@@ -46,7 +47,6 @@ export class TemplateComponent{
                     sf.filter = 'ID eq ' + item[i + '/' + this.listFields[i].lookupField];
 
                 var lf: SPFields = new SPFields;
-                lf['Id'] = { idx: 0, field: 'Id', header: 'Id' };
                 lf['ID'] = { idx: 1, field: 'ID', header: 'value' };
                 lf[this.listFields[i].lookupField] = { idx: 2, field: this.listFields[i].lookupField, header: 'label' };
 
@@ -68,13 +68,11 @@ export class TemplateComponent{
                 }
                 if (DSname !== 'main')
                     this.DS[DSname].items = items.map(i => {
-                        var r = {};
-                        Object.keys(listFld)
-                            .forEach(f => {
-                                r[listFld[f].header] = i[listFld[f].field];
-                            }, this)
-                        return r;
-                    });
+                        return {
+                            label: i['Title'],
+                            value: i
+                        }
+                    })
                 else
                     this.DS[DSname].items = items;
             });
@@ -90,19 +88,14 @@ export class TemplateComponent{
         let _items = [...this.DS['main'].items];
 
         let updateObject: Object = new Object;
-        /*Object.keys(this.listFields)
+        Object.keys(this.listFields)
             .filter(f => ((!this.listFields[f].readOnly) || this.listFields[f].field == 'ID'))
             .forEach(i => {
-                var ii;
                 if (this.listFields[i].lookupList)
-                    ii = i.slice(0, i.length - 2);
+                    updateObject[i + 'Id'] = this.item[i].Id;
                 else
-                    ii = i;
-                updateObject[ii] = this.item[i];
-            }, this);*/
-        updateObject['RegionalTechnicalCenter'] = {};
-        updateObject['RegionalTechnicalCenter']['ID'] = 1;
-        updateObject['ID'] = 1;
+                    updateObject[i] = this.item[i];
+            }, this);
 
         if (this.newItem) {
             this.service
@@ -139,12 +132,6 @@ export class TemplateComponent{
                 }
             })
     }
-
-    /*onRowSelect(event) {
-        this.newItem = false;
-        this.item = this.cloneItem(event.data);
-        this.displayDialog = true;
-    }*/
 
     cloneItem(c: Object, empty?: boolean): Object {
         let _item = {};
