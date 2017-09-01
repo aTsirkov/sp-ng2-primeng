@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core'
+﻿import { NgModule } from '@angular/core'
 import { RouterModule } from '@angular/router';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { rootRouterConfig } from './app.routes';
@@ -6,6 +6,8 @@ import { AppComponent } from './app.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
 import { HttpModule } from '@angular/http';
+
+import { BusyModule, BusyConfig } from 'angular2-busy';
 
 import { HomeComponent } from './forms/home/home.component';
 import { CompanyComponent } from './forms/company/company.component';
@@ -29,6 +31,7 @@ import { materialsRTKComponent } from './forms/rtk/rtk_materials/rtk_materials.c
 import { objectsRTKComponent } from './forms/rtk/rtk_objects/rtk_objects.component';
 
 import { SpService } from './sharepoint/sharepoint.service';
+import { ExtractPropertyPipe } from './sharepoint/ItemTransform.pipe';
 // Test
 import { TestComponent } from './forms/test/test.component';
 
@@ -60,7 +63,8 @@ import {
       assetsRTKComponent,
       materialsRTKComponent,
       objectsRTKComponent,
-      TestComponent
+      TestComponent,
+      ExtractPropertyPipe
   ],
   imports: [
     BrowserModule,
@@ -68,6 +72,12 @@ import {
     ReactiveFormsModule,
     HttpModule,
     BrowserAnimationsModule,
+    BusyModule.forRoot(
+        new BusyConfig({
+            message: 'и Мы работаем над этим...',
+            backdrop: false
+        })
+        ),
     RouterModule.forRoot(rootRouterConfig, { useHash: true }),
     ToolbarModule, PanelMenuModule, SharedModule,
     TooltipModule, ButtonModule, TabViewModule,

@@ -6,6 +6,7 @@ import { AppModule } from './app/app.module';
 import 'primeng/resources/themes/kasper/theme.css';
 import 'font-awesome/css/font-awesome.min.css';
 import 'primeng/resources/primeng.min.css';
+import 'angular2-busy/build/style/busy.css';
 
 export const platformRef = platformBrowserDynamic();
 

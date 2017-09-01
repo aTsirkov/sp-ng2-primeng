@@ -126,7 +126,7 @@ module.exports = {
             "coreOptions": {
                 "checkin": true,
                 "checkinType": 1,
-                "siteUrl": "http://s502as-its-sp01/sites/RTMonitor/"   // "http://win-fhs38e94km0/sites/Develop"
+                "siteUrl": "https://s001cl-spswfe01/Hermione/0706/"//"http://s502as-its-sp01/sites/RTMonitor/"   // "http://win-fhs38e94km0/sites/Develop"
             },
             "credentialOptions": {
                 username: 'tsirkovaa',

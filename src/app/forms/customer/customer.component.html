@@ -1,8 +1,10 @@
 ﻿<p-dataTable class="table" [value]="DS.main.items" selectionMode="single" [(selection)]="selectedItem"
              (onRowDblclick)="onRowSelect($event)" [responsive]="true" scrollable="true" scrollHeight="600px">
-
-    <p-column *ngFor="let col of visibleCols" [field]="col.field" [header]="col.header"></p-column>
-
+    <p-column *ngFor="let col of visibleCols" [field]="col.field" [header]="col.header">
+        <template let-row="rowData" pTemplate type="body">
+            <span>{{row | extractProperty:col.field}}</span>
+        </template>
+    </p-column>
     <p-footer>
         <div class="ui-helper-clearfix">
             <button type="button" pButton icon="fa-plus" style="float:left" (click)="showDialogToAdd()" label="Add"></button>

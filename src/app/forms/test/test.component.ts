@@ -21,13 +21,9 @@ export class TestComponent extends TemplateComponent {
     }
 
     onRowSelect(event) {
-        /*this.updateDM(event.data)
-            .then(() => {*/
-                //super.onRowSelect(event));
-                this.newItem = false;
-                this.item = this.cloneItem(event.data);
-                this.displayDialog = true;
-            //});
+        this.newItem = false;
+        this.item = this.cloneItem(event.data);
+        this.displayDialog = true;
     }
     
 }

@@ -18,7 +18,12 @@ export class unifiedRTKComponent extends TemplateComponent {
                 listTitle: 'Унифицированная РТК',
                 viewName: 'Все элементы'
             });
+    }
 
+    onRowSelect(event) {
+        this.newItem = false;
+        this.item = this.cloneItem(event.data);
+        this.displayDialog = true;
     }
 
 }

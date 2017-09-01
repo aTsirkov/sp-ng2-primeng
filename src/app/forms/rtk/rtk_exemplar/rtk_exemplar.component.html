@@ -1,8 +1,10 @@
 ﻿<p-dataTable class="table" [value]="DS.main.items" selectionMode="single" [(selection)]="selectedItem"
              (onRowDblclick)="onRowSelect($event)" [responsive]="true" scrollable="true" scrollHeight="600px">
-
-    <p-column *ngFor="let col of visibleCols" [field]="col.field" [header]="col.header"></p-column>
-
+    <p-column *ngFor="let col of visibleCols" [field]="col.field" [header]="col.header">
+        <template let-row="rowData" pTemplate type="body">
+            <span>{{row | extractProperty:col.field}}</span>
+        </template>
+    </p-column>
     <p-footer>
         <div class="ui-helper-clearfix">
             <button type="button" pButton icon="fa-plus" style="float:left" (click)="showDialogToAdd()" label="Add"></button>
@@ -10,156 +12,107 @@
     </p-footer>
 </p-dataTable>
 
-<!--<p-dialog  header="Информация об унифицированных РТК" [(visible)]="displayDialog" [responsive]="true" showEffect="fade" [modal]="true">
-    <div class="ui-grid ui-grid-responsive ui-fluid" *ngIf="exemplar">
-        <div class="ui-grid-row">
-            <div class="ui-grid-col-4"><label for="Title">Название</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="Title" [(ngModel)]="exemplar.Title" /></div>
-        </div>
-        <div class="ui-grid-row">
-            <div class="ui-grid-col-4"><label for="ServiceCatalog">Услуга</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="ServiceCatalog" [(ngModel)]="exemplar.ServiceCatalog" /></div>
-        </div>
-        <div class="ui-grid-row">
-            <div class="ui-grid-col-4"><label for="RegionalTechnicalCenter">РТЦ-владелец договора</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="RegionalTechnicalCenter" [(ngModel)]="exemplar.RegionalTechnicalCenter" /></div>
-        </div>
-        <div class="ui-grid-row">
-            <div class="ui-grid-col-4"><label for="CompanyCustomer">Заказчик</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="CompanyCustomer" [(ngModel)]="exemplar.CompanyCustomer" /></div>
-        </div>
-        <div class="ui-grid-row">
-            <div class="ui-grid-col-4"><label for="Agreement">Код договора</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="Agreement" [(ngModel)]="exemplar.Agreement" /></div>
-        </div>
-        <div class="ui-grid-row">
-            <div class="ui-grid-col-4"><label for="OperationAmount">Сумма по операциям</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="OperationAmount" [(ngModel)]="exemplar.OperationAmount" /></div>
-        </div>
-        <div class="ui-grid-row">
-            <div class="ui-grid-col-4"><label for="MaterialAmount">Сумма по материалам</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="MaterialAmount" [(ngModel)]="exemplar.MaterialAmount" /></div>
-        </div>
-        <div class="ui-grid-row">
-            <div class="ui-grid-col-4"><label for="SubcontractingAmount">Сумма по субподряду</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="SubcontractingAmount" [(ngModel)]="exemplar.SubcontractingAmount" /></div>
-        </div>
-        <div class="ui-grid-row">
-            <div class="ui-grid-col-4"><label for="ActiveAmount">Сумма по активам</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="ActiveAmount" [(ngModel)]="exemplar.ActiveAmount" /></div>
-        </div>
-        <div class="ui-grid-row">
-            <div class="ui-grid-col-4"><label for="TotalAmount">Сумма по РТК</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="TotalAmount" [(ngModel)]="exemplar.TotalAmount" /></div>
-        </div>
-        <div class="ui-grid-row">
-            <div class="ui-grid-col-4"><label for="Status">Статус</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="Status" [(ngModel)]="exemplar.Status" /></div>
-        </div>
-        <div class="ui-grid-row">
-            <div class="ui-grid-col-4"><label for="Unified">Унифицирована</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="Unified" [(ngModel)]="exemplar.Unified" /></div>
-        </div>
-    </div>
-    <p-footer>
-        <div class="ui-dialog-buttonpane ui-helper-clearfix">
-            <button type="button" pButton icon="fa-close" (click)="delete()" label="Delete"></button>
-            <button type="button" pButton icon="fa-check" (click)="save()" label="Save"></button>
-        </div>
-    </p-footer>
-</p-dialog>-->
+<p-dialog header="Информация об экземплярах РТК" [(visible)]="displayDialog" [responsive]="true" showEffect="fade" [modal]="true" appendTo="body" [width]="1000">
+    <form [formGroup]="myForm">
+        <div class="ui-grid ui-grid-responsive ui-fluid" *ngIf="item">
+            <div class="ui-grid-row">
+                <div class="ui-grid-col-4"><label for="Title">Название</label></div>
+                <div class="ui-grid-col-8"><input pInputText id="Title" [(ngModel)]="item.Title" formControlName="Title" /></div>
+            </div>
 
-<p-dialog header="Информация об экземплярах РТК" [(visible)]="displayDialog" [responsive]="true" showEffect="fade" [modal]="true" appendTo="body">
-    <div class="ui-grid ui-grid-responsive ui-fluid" *ngIf="exemplar">
-        <div class="ui-g-8">
-            <div class="ui-grid-col-4"><label for="Title">Название:</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="Title" [(ngModel)]="exemplar.Title" /></div>
-        </div>
+            <div class="ui-grid-row">
+                <div class="ui-grid-col-4"><label for="Status">Статус</label></div>
+                <p-dropdown id="Status" [options]="listFields.Status.choices" [(ngModel)]="item.Status"
+                            formControlName="Status" appendTo="body" [style]="{'width':'150px'}"></p-dropdown>
+            </div>
 
+            <div class="ui-grid-row">
+                <div class="ui-grid-col-4"><label for="TotalAmount">Итого:</label></div>
+                <div class="ui-grid-col-8"><input pInputText id="TotalAmount" [(ngModel)]="item.TotalAmount" formControlName="TotalAmount" /></div>
+            </div>
 
-        <div class="ui-g-2">
-            <div class="ui-grid-col-4"><label for="Status">Статус:</label></div>
-            <div class="ui-grid-col-8"><p-dropdown [style]="{'width':'100px'}" [options]="statuses" [(ngModel)]="selectedStatus"></p-dropdown></div>
-        </div>
-        <div class="ui-g-2">
-            <div class="ui-grid-col-4"><label for="TotalAmount">Итого:</label></div>
-            <div class="ui-grid-col-8">{{exemplar.TotalAmount}}</div>
-        </div>
+            <hr align="center" width="100%" />
 
-        <hr align="center" width="100%" />
+            <div class="ui-grid-row">
+                <div class="ui-grid-col-4"><label for="ServiceCatalog">Услуга</label></div>
+                <div class="ui-grid-col-8">
+                    <p-dropdown id="ServiceCatalog" [options]="DS['Каталог услуг'].items" [(ngModel)]="item.ServiceCatalog"
+                                formControlName="ServiceCatalog" appendTo="body" [style]="{'width':'100%'}"></p-dropdown>
+                </div>
+            </div>
 
-        <div class="ui-g-8">
-            <div class="ui-grid-col-4"><label for="ServiceCatalog">Услуга</label></div>
-            <p-dropdown [style]="{'width':'150px'}" [options]="services" [(ngModel)]="selectedService"></p-dropdown>
-        </div>
-        <div class="ui-g-4">
-            <div class="ui-grid-col-4"><label for="RegionalTechnicalCenter">РТЦ-владелец договора</label></div>
-            <p-dropdown [style]="{'width':'150px'}" [options]="rtcs" [(ngModel)]="selectedRTC"></p-dropdown>
-        </div>
+            <div class="ui-grid-row">
+                <div class="ui-grid-col-4"><label for="RegionalTechnicalCenter">РТЦ - владелец договора</label></div>
+                <div class="ui-grid-col-8">
+                    <p-dropdown id="RegionalTechnicalCenter" [options]="DS['Региональные технические центры'].items" [(ngModel)]="item.RegionalTechnicalCenter"
+                                formControlName="RegionalTechnicalCenter" appendTo="body" [style]="{'width':'100%'}"></p-dropdown>
+                </div>
+            </div>
+            
+            <hr align="center" width="100%" />
+            <div class="ui-grid-row">
+                <div class="ui-grid-col-4"><label for="CompanyCustomer">Заказчик</label></div>
+                <div class="ui-grid-col-8">
+                    <p-dropdown id="CompanyCustomer" [options]="DS['Заказчики'].items" [(ngModel)]="item.CompanyCustomer"
+                                formControlName="CompanyCustomer" appendTo="body" [style]="{'width':'100%'}"></p-dropdown>
+                </div>
+            </div>
+            <div class="ui-grid-row">
+                <div class="ui-grid-col-4"><label for="Agreement">Код договора</label></div>
+                <div class="ui-grid-col-8"><input pInputText id="Agreement" [(ngModel)]="item.Agreement" formControlName="Agreement" /></div>
+            </div>
 
-        <hr align="center" width="100%" />
+            <hr align="center" width="100%" />
 
-        <div class="ui-g-8">
-            <div class="ui-grid-col-4"><label for="CompanyCustomer">Заказчик</label></div>
-            <div class="ui-grid-col-8">{{exemplar.CompanyCustomer}}</div>
-        </div>
-        <div class="ui-g-4">
-            <div class="ui-grid-col-4"><label for="Agreement">Код договора</label></div>
-            <div class="ui-grid-col-8">{{exemplar.Agreement}}</div>
-        </div>
+            <div class="ui-grid-3">
+                <div class="ui-grid-col-4"><label for="OperationAmount">Сумма по операциям:</label></div>
+                <div class="ui-grid-col-8"><input pInputText id="OperationAmount" [(ngModel)]="item.OperationAmount" formControlName="OperationAmount" /></div>
+            </div>
+            <div class="ui-grid-3">
+                <div class="ui-grid-col-4"><label for="MaterialAmount">Сумма по материалам:</label></div>
+                <div class="ui-grid-col-8"><input pInputText id="MaterialAmount" [(ngModel)]="item.MaterialAmount" formControlName="MaterialAmount" /></div>
+            </div>
+            <div class="ui-grid-3">
+                <div class="ui-grid-col-4"><label for="SubcontractingAmount">Сумма по субподряду:</label></div>
+                <div class="ui-grid-col-8"><input pInputText id="SubcontractingAmount" [(ngModel)]="item.SubcontractingAmount" formControlName="SubcontractingAmount" /></div>
+            </div>
+            <div class="ui-grid-3">
+                <div class="ui-grid-col-4"><label for="ActiveAmount">Сумма по активам:</label></div>
+                <div class="ui-grid-col-8"><input pInputText id="ActiveAmount" [(ngModel)]="item.ActiveAmount" formControlName="ActiveAmount" /></div>
+            </div>
 
-        <hr align="center" width="100%" />
-
-        <div class="ui-g-3">
-            <div class="ui-grid-col-4"><label for="OperationAmount">Сумма по операциям</label></div>
-            <div class="ui-grid-col-8">{{exemplar.OperationAmount}}</div>
+            <!--<div class="ui-grid-row">
+                <div class="ui-grid-col-4"><label for="Unified">Унифицирована</label></div>
+                <div class="ui-grid-col-8"><input pInputText id="Unified" [(ngModel)]="exemplar.Unified" /></div>
+            </div>-->
         </div>
-        <div class="ui-g-3">
-            <div class="ui-grid-col-4"><label for="MaterialAmount">Сумма по материалам</label></div>
-            <div class="ui-grid-col-8">{{exemplar.MaterialAmount}}</div>
-        </div>
-        <div class="ui-g-3">
-            <div class="ui-grid-col-4"><label for="SubcontractingAmount">Сумма по субподряду</label></div>
-            <div class="ui-grid-col-8">{{exemplar.SubcontractingAmount}}</div>
-        </div>
-        <div class="ui-g-3">
-            <div class="ui-grid-col-4"><label for="ActiveAmount">Сумма по активам</label></div>
-            <div class="ui-grid-col-8">{{exemplar.ActiveAmount}}</div>
-        </div>
+    </form>
+        <p-tabView>
+            <p-tabPanel header="Виды объектов обслуживания" [selected]="true">
+                <object_kind></object_kind>
+            </p-tabPanel>
+            <p-tabPanel header="Собственные операции">
+                Content 2
+            </p-tabPanel>
+            <p-tabPanel header="Унифицированные операции">
+                Content 3
+            </p-tabPanel>
+            <p-tabPanel header="Материалы">
+                <rtk_materials></rtk_materials>
+            </p-tabPanel>
+            <p-tabPanel header="Субподряд">
+                <rtk_subcontracting></rtk_subcontracting>
+            </p-tabPanel>
+            <p-tabPanel header="Активы">
+                <rtk_assets></rtk_assets>
+            </p-tabPanel>
+        </p-tabView>
 
 
-        <!--<div class="ui-grid-row">
-            <div class="ui-grid-col-4"><label for="Unified">Унифицирована</label></div>
-            <div class="ui-grid-col-8"><input pInputText id="Unified" [(ngModel)]="exemplar.Unified" /></div>
-        </div>-->
-    </div>
-
-    <p-tabView>
-        <p-tabPanel header="Виды объектов обслуживания" [selected]="true">
-            <!--<company></company>-->
-        </p-tabPanel>
-        <p-tabPanel header="Собственные операции">
-            Content 2
-        </p-tabPanel>
-        <p-tabPanel header="Унифицированные операции">
-            Content 3
-        </p-tabPanel>
-        <p-tabPanel header="Материалы">
-            <rtk_materials></rtk_materials>
-        </p-tabPanel>
-        <p-tabPanel header="Субподряд">
-            <rtk_subcontracting></rtk_subcontracting>
-        </p-tabPanel>
-        <p-tabPanel header="Активы">
-            <rtk_assets></rtk_assets>
-        </p-tabPanel>
-    </p-tabView>
-
-
-    <p-footer>
-        <div class="ui-dialog-buttonpane ui-helper-clearfix">
-            <button type="button" pButton icon="fa-close" (click)="delete()" label="Delete"></button>
-            <button type="button" pButton icon="fa-check" (click)="save()" label="Save"></button>
-        </div>
-    </p-footer>
+        <p-footer>
+            <div class="ui-dialog-buttonpane ui-helper-clearfix">
+                <button type="button" pButton icon="fa-close" (click)="delete()" label="Delete"></button>
+                <button type="button" pButton icon="fa-check" (click)="save()" label="Save"></button>
+            </div>
+        </p-footer>
 </p-dialog>

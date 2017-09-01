@@ -16,6 +16,8 @@ export class TemplateComponent{
     public newItem: boolean;
     public displayDialog: boolean;
 
+    public busy: Promise<any>;
+
     constructor(private service: SpService, private spform: SPForm) {
         this.spForm = spform;
         this.DS['main'] = {
@@ -24,9 +26,10 @@ export class TemplateComponent{
             items: []
         };
 
-        this.service
-            .getListColumns(this.spForm)
-            .then((data: SPField[]) => {
+        this.busy = this.service
+            .getListColumns(this.spForm);
+
+        this.busy.then((data: SPField[]) => {
                 this.listFields = getListFields(data);
                 this.getDS('main', this.spForm, this.listFields);
                 this.myForm = new FormGroup(getFormControls(this.listFields));
@@ -91,25 +94,25 @@ export class TemplateComponent{
         Object.keys(this.listFields)
             .filter(f => ((!this.listFields[f].readOnly) || this.listFields[f].field == 'ID'))
             .forEach(i => {
-                if (this.listFields[i].lookupList)
+                if (this.listFields[i].lookupField)
                     updateObject[i + 'Id'] = this.item[i].Id;
                 else
                     updateObject[i] = this.item[i];
             }, this);
 
         if (this.newItem) {
-            this.service
-                .addListItem(this.spForm, updateObject)
-                .then(newItem => {
+            this.busy = this.service
+                .addListItem(this.spForm, updateObject);
+            this.busy.then(newItem => {
                     _items.push(newItem);
                     this.DS['main'].items = _items;
                     this.item = null;
                 });
         }
         else {
-            this.service
-                .updateListItem(this.spForm, updateObject)
-                .then(item => {
+            this.busy = this.service
+                .updateListItem(this.spForm, updateObject);
+            this.busy.then(item => {
                     _items[this.findSelectedItemIndex()] = this.item;
                     this.DS['main'].items = _items;
                     this.item = null;
@@ -122,9 +125,9 @@ export class TemplateComponent{
     delete() {
         let index = this.findSelectedItemIndex();
 
-        this.service
-            .deleteListItem(this.spForm, this.item)
-            .then(res => {
+        this.busy = this.service
+            .deleteListItem(this.spForm, this.item);
+        this.busy.then(res => {
                 if (res) {
                     this.DS['main'].items = this.DS['main'].items.filter((val, i) => i != index);
                     this.item = null;

@@ -1,5 +1,6 @@
 ﻿import { Component, ViewChild } from '@angular/core';
 import { SpService } from '../../../sharepoint/sharepoint.service';
+import { ExtractPropertyPipe } from '../../../sharepoint/ItemTransform.pipe';
 import { DataTable } from 'primeng/primeng';
 import { TemplateComponent } from '../../form.template';
 
@@ -22,13 +23,9 @@ export class SRVcatalogComponent extends TemplateComponent {
     }
 
     onRowSelect(event) {
-        this.updateDM(event.data)
-            .then(() => {
-                //super.onRowSelect(event));
-                this.newItem = false;
-                this.item = this.cloneItem(event.data);
-                this.displayDialog = true;
-            });
+        this.newItem = false;
+        this.item = this.cloneItem(event.data);
+        this.displayDialog = true;
     }
 
 }

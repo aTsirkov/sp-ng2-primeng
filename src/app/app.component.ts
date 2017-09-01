@@ -33,10 +33,14 @@ import { Component, trigger, state, style, transition, animate, OnInit } from '@
 })
 export class AppComponent {
     menuState: string = 'in';
+    public busy: Promise<any>;
 
     toggleMenu() {
         // 1-line if statement that toggles the value:
         this.menuState = this.menuState === 'out' ? 'in' : 'out';
     }
 
+    onActivate(componentRef) {
+        this.busy = componentRef.busy;
+    }
 }

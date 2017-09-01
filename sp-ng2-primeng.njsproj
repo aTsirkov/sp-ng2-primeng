@@ -85,7 +85,7 @@
     <Content Include="src\app\sharepoint\test\test.component.css" />
     <Content Include="src\app\sharepoint\test\test.component.html" />
     <Content Include="src\favicon.ico" />
-    <Content Include="src\Germiona.aspx" />
+    <Content Include="src\Project.aspx" />
     <Content Include="src\index.html" />
     <Content Include="tsconfig.aot.json" />
     <Content Include="tsconfig.json" />
@@ -135,6 +135,7 @@
     <TypeScriptCompile Include="src\app\forms\services\srv_catalog\srv_catalog.component.ts" />
     <TypeScriptCompile Include="src\app\forms\services\object_kind\srv_obj_kind.component.ts" />
     <TypeScriptCompile Include="src\app\forms\specialist\specialist.component.ts" />
+    <TypeScriptCompile Include="src\app\sharepoint\ItemTransform.pipe.ts" />
     <TypeScriptCompile Include="src\app\sharepoint\parser\SelectDecoratorsParsers.ts" />
     <TypeScriptCompile Include="src\app\sharepoint\sharepoint.service.ts" />
     <TypeScriptCompile Include="src\app\sharepoint\sharepoint.settings.ts" />

@@ -22,4 +22,10 @@ export class OrderComponent extends TemplateComponent {
 
     }
 
+    onRowSelect(event) {
+        this.newItem = false;
+        this.item = this.cloneItem(event.data);
+        this.displayDialog = true;
+    }
+
 }
